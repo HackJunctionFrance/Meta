@@ -1,0 +1,65 @@
+/* Incident report: same first-aid card world as the console. */
+:root {
+  --ground: #eceeed; --card: #ffffff; --ink: #121416; --ink-2: #4a5056; --ink-3: #6b7177;
+  --rule: #dfe2e1; --rule-strong: #c9cdcc; --red: #c62a1e; --amber: #a15c00; --amber-soft: #fbf0dc;
+  color-scheme: light;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px; line-height: 1.5; color: var(--ink); background: var(--ground);
+  -webkit-font-smoothing: antialiased;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --ground: #0f1112; --card: #181b1d; --ink: #eef0ef; --ink-2: #b4b9bc; --ink-3: #8c9296;
+    --rule: #272b2e; --rule-strong: #343a3d; --red: #d8342a; --amber: #e8a33c; --amber-soft: #2f2410; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ground); }
+h1, h2, p { margin: 0; }
+::selection { background: var(--red); color: #fff; }
+time, dd { font-variant-numeric: tabular-nums; }
+.bar { display: flex; align-items: center; gap: 24px; padding: 12px 28px; font-size: 13px; color: var(--ink-3); }
+.brand { display: inline-flex; align-items: center; gap: 8px; color: var(--ink); font-size: 15px; font-weight: 650; }
+.mark { width: 16px; height: 16px; fill: var(--red); }
+.btn { margin-left: auto; font: inherit; font-weight: 500; color: var(--ink); background: var(--card); border: 1px solid var(--rule-strong); border-radius: 8px; padding: 7px 14px; cursor: pointer; }
+.btn:hover { border-color: var(--ink-3); }
+main { max-width: 980px; margin: 0 auto; padding: 8px 28px 32px; display: grid; gap: 12px; }
+.head { padding: 12px 0 8px; }
+.head h1 { font-size: 26px; font-weight: 650; letter-spacing: -0.02em; }
+.meta { color: var(--ink-3); font-size: 13px; margin-top: 4px; overflow-wrap: anywhere; }
+.sheet { background: var(--card); border: 1px solid var(--rule); border-radius: 10px; padding: 18px 20px; }
+.sheet h2 { font-size: 13px; font-weight: 600; color: var(--ink-3); margin-bottom: 10px; }
+.sheet p + p { margin-top: 8px; }
+.timings { display: grid; grid-template-columns: repeat(4, 1fr); margin: 0; }
+.timings div { padding: 4px 16px; border-left: 1px solid var(--rule); }
+.timings div:first-child { border-left: 0; padding-left: 0; }
+.timings dt { font-size: 13px; color: var(--ink-3); }
+.timings dd { margin: 2px 0 0; font-size: 22px; font-weight: 600; }
+.note { margin-top: 12px; font-size: 13px; color: var(--ink-3); }
+.handover { display: grid; grid-template-columns: repeat(2, 1fr); }
+.handover article { padding: 10px 16px 10px 0; border-top: 1px solid var(--rule); }
+.handover article:nth-child(even) { padding-left: 16px; border-left: 1px solid var(--rule); }
+.handover article:nth-child(-n+2) { border-top: 0; }
+.handover b { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: var(--card); font-size: 12px; }
+.handover p { margin-top: 6px; }
+.handover small { display: block; margin-top: 4px; color: var(--ink-3); font-size: 12px; }
+.frames { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+figure { margin: 0; }
+figure img { width: 100%; border-radius: 6px; display: block; background: #000; }
+figcaption { font-size: 12px; color: var(--ink-3); padding-top: 6px; }
+.list { list-style: none; margin: 0; padding: 0; }
+.list li { display: grid; grid-template-columns: 60px 1fr; gap: 8px; padding: 7px 0; border-top: 1px solid var(--rule); font-size: 14px; }
+.list li:first-child { border-top: 0; }
+.list time, .line time { color: var(--ink-3); font-size: 13px; }
+.line { display: grid; grid-template-columns: 60px auto 1fr; gap: 8px; }
+.line small { color: var(--ink-3); }
+.notice { background: var(--amber-soft); color: var(--amber); padding: 10px 14px; border-radius: 8px; font-size: 14px; }
+footer { color: var(--ink-3); font-size: 12px; padding-top: 8px; }
+@media (max-width: 700px) {
+  .timings, .handover { grid-template-columns: 1fr 1fr; }
+  .frames { grid-template-columns: 1fr 1fr; }
+  main { padding: 8px 16px 24px; }
+}
+@media print {
+  :root { --ground: #fff; --card: #fff; color-scheme: light; }
+  .btn { display: none; }
+  .sheet { break-inside: avoid; border-color: #ccc; }
+}

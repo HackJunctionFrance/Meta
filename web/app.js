@@ -202,6 +202,41 @@ function card(c = {}) {
     }
   }
 }
+// Guide protocol strip: what the witness reported, step by step.
+function protocol() {
+  const list = $("protocol");
+  if (!list) return;
+  const labels = (state.timeline || []).map((e) => e.label);
+  const reported = (yes, no) =>
+    labels.includes(yes) ? "Yes" : labels.includes(no) ? "No" : "";
+  const responsive = reported("Responding (reported)", "Not responding (reported)");
+  const breathing = reported(
+    "Breathing normally (reported)",
+    "Not breathing normally (reported)",
+  );
+  const live = ["ai_guide", "connected"].includes(state.phase);
+  const rows = [
+    [responsive, state.step === "responsive"],
+    [breathing, state.step === "breathing"],
+    [state.step === "cpr" ? (live ? "Guiding" : "Done") : "", state.step === "cpr"],
+  ];
+  const stopped = state.step === "stay";
+  [...list.children].forEach((li, i) => {
+    const [value, current] = rows[i];
+    li.dataset.state =
+      state.phase === "idle"
+        ? "todo"
+        : current && live
+          ? "current"
+          : value
+            ? "done"
+            : stopped
+              ? "skipped"
+              : "todo";
+    li.querySelector("em").textContent =
+      li.dataset.state === "skipped" ? "Not needed" : value;
+  });
+}
 function render(next) {
   const previous = state;
   state = next;
@@ -245,6 +280,7 @@ function render(next) {
     $("beat").hidden = !(state.step === "cpr" && state.phase === "ai_guide");
   if (state.phase === "idle" || state.phase === "ended") voice.disconnect();
   card(state.card);
+  protocol();
   text(
     "device",
     state.device?.glasses

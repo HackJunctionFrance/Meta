@@ -17,3 +17,5 @@ livekit-config.json
 !.env.example
 .env-livekit-*
 dist/
+.impeccable/review/
+.impeccable/questions/
