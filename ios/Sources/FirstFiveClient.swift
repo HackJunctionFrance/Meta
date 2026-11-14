@@ -100,12 +100,20 @@ final class FirstFiveClient: NSObject, AVSpeechSynthesizerDelegate {
     return parts.joined(separator: " · ")
   }
 
+  /// One audio setup for the whole guided phase (camera, spoken guide, metronome,
+  /// voice answers): loudspeaker or glasses, not muted by silent mode. Switching
+  /// category or mode right before a sentence is what made speech stutter, so the
+  /// session is configured only when it is not already in this state.
   func prepareAudio() throws {
     let audio = AVAudioSession.sharedInstance()
-    // defaultToSpeaker: without glasses, play on the loudspeaker, not the earpiece.
-    try audio.setCategory(.playAndRecord, mode: .voiceChat, options: [.allowBluetooth, .defaultToSpeaker])
+    if audio.category != .playAndRecord || audio.mode != .default
+      || !audio.categoryOptions.contains(.defaultToSpeaker) {
+      try audio.setCategory(.playAndRecord, mode: .default,
+                            options: [.allowBluetooth, .allowBluetoothA2DP, .defaultToSpeaker])
+    }
     try audio.setActive(true)
-    if let bluetooth = audio.availableInputs?.first(where: { $0.portType == .bluetoothHFP }) {
+    if let bluetooth = audio.availableInputs?.first(where: { $0.portType == .bluetoothHFP }),
+      audio.preferredInput?.uid != bluetooth.uid {
       try audio.setPreferredInput(bluetooth)
     }
     UIApplication.shared.isIdleTimerDisabled = true
@@ -197,6 +205,9 @@ final class FirstFiveClient: NSObject, AVSpeechSynthesizerDelegate {
     case "caller_heard":
       caption = message["text"] as? String ?? ""
       if message["source"] as? String == "ai_guide", phase == "ai_guide" {
+        // The same prompt can arrive twice (e.g. after a reconnect): never cut a
+        // sentence just to restart it.
+        if synthesizer.isSpeaking && caption == lastSpoken { break }
         speak(caption)
         if message["step_id"] as? String == "cpr" { metronome() }
       }
@@ -264,24 +275,14 @@ final class FirstFiveClient: NSObject, AVSpeechSynthesizerDelegate {
   /// (ambient) session is muted by the ring/silent switch.
   private func prepareGuideAudio() {
     guard room == nil else { return } // LiveKit owns the session during a call
-    let audio = AVAudioSession.sharedInstance()
-    do {
-      try audio.setCategory(.playback, mode: .spokenAudio, options: [.duckOthers])
-      try audio.setActive(true)
-    } catch { failure = "Audio unavailable: \(error.localizedDescription)" }
+    do { try prepareAudio() } catch { failure = "Audio unavailable: \(error.localizedDescription)" }
   }
 
+  @ObservationIgnored private var lastSpoken = ""
   private func speak(_ text: String) {
+    lastSpoken = text
     stopListening(); synthesizer.stopSpeaking(at: .immediate)
     prepareGuideAudio()
-    if room == nil {
-      // Guide prompts must be heard even with the ring/silent switch on and
-      // without glasses: playback category, loudspeaker or Bluetooth.
-      let audio = AVAudioSession.sharedInstance()
-      try? audio.setCategory(.playAndRecord, mode: .default,
-                             options: [.allowBluetooth, .allowBluetoothA2DP, .defaultToSpeaker, .duckOthers])
-      try? audio.setActive(true)
-    }
     let utterance = AVSpeechUtterance(string: text); utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
     synthesizer.speak(utterance)
   }
