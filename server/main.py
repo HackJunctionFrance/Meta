@@ -112,6 +112,13 @@ class Hub:
                 }
             )
 
+    async def first_prompt(self, s):
+        # Pause after the alert so the witness can settle before the first question.
+        # Skipped if an answer, reset or pickup happened meanwhile.
+        await asyncio.sleep(float(os.getenv("FIRSTFIVE_FIRST_PROMPT_DELAY", "10")))
+        if self.session is s and s.phase == "ai_guide" and s.step == "responsive":
+            await self.prompt()
+
     async def scene_loop(self, s):
         while self.session is s and s.phase in ("ai_guide", "connected"):
             if self.latest:
@@ -204,7 +211,7 @@ class Hub:
             self.last_keyframe = 0
             self.session.event("alert", "Simulated emergency activated by witness")
             await self.publish()
-            await self.prompt()
+            self.spawn(self.first_prompt(self.session))
             self.spawn(self.scene_loop(self.session))
             return
         s = self.session
