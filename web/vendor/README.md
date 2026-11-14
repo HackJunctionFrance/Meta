@@ -1,0 +1,1 @@
+LiveKit browser client 2.24.1, `dist/livekit-client.umd.js` from the official npm `livekit-client` package. Apache-2.0 license in LIVEKIT-LICENSE. Vendored so the console needs no CDN at runtime. Refresh using `npm pack livekit-client@2.24.1`, verify npm integrity, extract the UMD bundle and license; do not edit the generated bundle.

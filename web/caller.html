@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>FirstFive · Caller view</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body data-page="caller" class="caller">
+    <header>
+      <a href="/console">FirstFive <span> / through the witness’s eyes</span></a
+      ><span id="connection">Connecting…</span>
+    </header>
+    <main>
+      <div class="statusbar">
+        <h1 id="phase">Waiting for a call</h1>
+        <span class="tag">SIMULATION</span><time id="timer">00:00</time>
+      </div>
+      <div id="error" class="notice" hidden></div>
+      <div class="video">
+        <p class="placeholder">The first five minutes matter.</p>
+        <img id="frame" alt="Live camera feed" hidden /><span
+          class="badge"
+          id="device"
+          >Camera waiting</span
+        >
+      </div>
+      <div class="subtitle">
+        <small id="source">CALLER EXPERIENCE</small
+        ><span id="caption">Ready.</span>
+      </div>
+      <p id="beat" class="pulse" hidden>● CPR guidance · 110 bpm</p>
+      <p id="progress"></p>
+      <a id="reportLink" hidden>Open incident report →</a>
+      <footer>Simulated emergency · no real 112 connection</footer>
+    </main>
+    <script type="module" src="/static/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,18 @@
+.venv/
+.env
+data/
+__pycache__/
+.pytest_cache/
+node_modules/
+test-results/
+ios/CameraAccess/
+.DS_Store
+.tools/
+
+.ruff_cache/
+backup-before-update-*/
+# Private deployment helpers and configuration backups
+livekit-config.json
+.env.*
+!.env.example
+.env-livekit-*

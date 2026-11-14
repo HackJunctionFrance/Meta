@@ -1,0 +1,379 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  color: #ecf3f2;
+  background: #0c1418;
+  font-synthesis: none;
+  --muted: #9aadb2;
+  --line: #2b3b40;
+  --green: #9aefbd;
+  --red: #ff7279;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+header {
+  height: 80px;
+  padding: 0 4vw;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+}
+header a {
+  font-weight: 800;
+  font-size: 25px;
+  text-decoration: none;
+  color: inherit;
+  letter-spacing: -1px;
+}
+header span {
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+nav {
+  display: flex;
+  gap: 18px;
+}
+a {
+  color: var(--green);
+}
+button,
+input {
+  font: inherit;
+}
+button {
+  background: var(--green);
+  border: 0;
+  color: #10261c;
+  padding: 13px 22px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+}
+button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+button.secondary {
+  background: #24373e;
+  color: #eaf3f2;
+}
+button.danger {
+  background: var(--red);
+  color: #35171b;
+}
+input {
+  background: #19272d;
+  border: 1px solid #3b5159;
+  color: white;
+  border-radius: 6px;
+  padding: 12px;
+  max-width: 100%;
+}
+main {
+  padding: 32px 4vw;
+  max-width: 1600px;
+  margin: auto;
+}
+.eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--green);
+}
+.statusbar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin: 16px 0 28px;
+}
+.statusbar h1 {
+  margin: 0;
+  font-size: 32px;
+  letter-spacing: -1px;
+}
+.statusbar time {
+  margin-left: auto;
+  font:
+    30px ui-monospace,
+    monospace;
+}
+.tag {
+  padding: 7px 10px;
+  border-radius: 5px;
+  background: #20332b;
+  color: var(--green);
+  font-size: 12px;
+}
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(280px, 1fr);
+  gap: 24px;
+}
+.video {
+  position: relative;
+  background: #152329;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 16/9;
+  display: grid;
+  place-items: center;
+}
+.video > img,
+.video > video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  position: absolute;
+  inset: 0;
+}
+.video .placeholder {
+  color: #6a848c;
+  text-align: center;
+}
+.video .badge {
+  position: absolute;
+  left: 18px;
+  top: 16px;
+  background: #102026cc;
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-size: 12px;
+}
+.subtitle {
+  min-height: 100px;
+  padding: 20px 0;
+  font-size: 25px;
+  line-height: 1.4;
+}
+.subtitle small {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--green);
+  margin-bottom: 8px;
+}
+.panel {
+  border: 1px solid var(--line);
+  background: #122026;
+  border-radius: 12px;
+  padding: 24px;
+}
+.panel h2 {
+  font-size: 23px;
+  line-height: 1.3;
+}
+h2 {
+  letter-spacing: -0.5px;
+}
+.muted,
+small {
+  color: var(--muted);
+}
+.facts {
+  list-style: none;
+  padding: 0;
+}
+.facts li {
+  padding: 15px 0;
+  border-bottom: 1px solid var(--line);
+  line-height: 1.5;
+}
+.facts time {
+  color: var(--green);
+  font: 13px monospace;
+  display: block;
+}
+.timeline {
+  list-style: none;
+  padding: 0;
+}
+.timeline li {
+  display: flex;
+  gap: 25px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.timeline time {
+  color: var(--muted);
+  min-width: 70px;
+  font: 14px monospace;
+}
+.controls {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+.notice {
+  background: #352b1d;
+  color: #f6cf92;
+  padding: 14px;
+  border-radius: 6px;
+}
+.incoming {
+  color: var(--red);
+}
+.connected {
+  color: var(--green);
+}
+#connection {
+  font-size: 12px;
+}
+#connection.offline {
+  color: var(--red);
+}
+#reportLink {
+  display: inline-block;
+  margin: 10px 0;
+}
+#reportFrame {
+  width: 100%;
+  height: 75vh;
+  border: 1px solid var(--line);
+}
+[hidden] {
+  display: none !important;
+}
+footer {
+  color: var(--muted);
+  font-size: 12px;
+  border-top: 1px solid var(--line);
+  padding: 24px 0;
+  margin-top: 30px;
+}
+.caller .video {
+  max-height: 70vh;
+}
+.caller .subtitle {
+  font-size: 32px;
+}
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin: 35px 0;
+}
+.metrics article {
+  background: #17282e;
+  border: 1px solid var(--line);
+  padding: 24px;
+  border-radius: 8px;
+}
+.metrics strong {
+  display: block;
+  font-size: 35px;
+  color: var(--green);
+}
+.metrics span {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+}
+.report h1 {
+  font-size: 52px;
+  letter-spacing: -2px;
+}
+.handover {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+.handover article {
+  padding: 20px;
+  background: #17282e;
+  border-radius: 8px;
+}
+.handover b {
+  color: var(--green);
+}
+.frames {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+figure {
+  margin: 0;
+}
+figure img {
+  width: 100%;
+  border-radius: 8px;
+}
+figcaption {
+  font-size: 13px;
+  color: var(--muted);
+  padding: 10px 0;
+}
+.pulse {
+  color: var(--red);
+  font-size: 20px;
+}
+.tools {
+  margin: 25px 0;
+}
+.tools summary {
+  cursor: pointer;
+  color: var(--muted);
+}
+@media (max-width: 800px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .metrics,
+  .frames {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  header span {
+    display: none;
+  }
+  .statusbar {
+    flex-wrap: wrap;
+  }
+  .statusbar h1 {
+    font-size: 23px;
+  }
+  .handover {
+    grid-template-columns: 1fr;
+  }
+}
+@media print {
+  body {
+    background: white;
+    color: #111;
+  }
+  header button,
+  nav {
+    display: none;
+  }
+  main {
+    padding: 10px;
+  }
+  .panel,
+  .metrics article,
+  .handover article {
+    background: #eee;
+    color: #111;
+  }
+  .metrics strong,
+  a {
+    color: #111;
+  }
+  h2 {
+    break-after: avoid;
+  }
+  figure,
+  article {
+    break-inside: avoid;
+  }
+  footer,
+  small,
+  .muted {
+    color: #555;
+  }
+}

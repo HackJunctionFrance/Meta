@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>FirstFive · Test caller</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body data-page="test-caller" class="caller">
+    <header>
+      <a href="/console">FirstFive <span> / hardware-free rehearsal</span></a
+      ><span id="connection">Connecting…</span>
+    </header>
+    <main>
+      <p class="eyebrow">NO GLASSES REQUIRED</p>
+      <div class="statusbar">
+        <h1 id="phase">Waiting for a call</h1>
+        <span class="tag">SIMULATION</span><time id="timer">00:00</time>
+      </div>
+      <p>
+        Use a cushion or mannequin only. Triggering starts shared camera frames;
+        answering enables the recorded voice call.
+      </p>
+      <div id="error" class="notice" hidden></div>
+      <div class="controls">
+        <button id="emergency" class="danger">EMERGENCY · demo</button
+        ><button id="yes">Yes</button><button id="no">No</button
+        ><button id="joinCall" class="secondary">Join / retry voice</button
+        ><button id="camera" class="secondary">Enable camera</button
+        ><button id="listen" class="secondary">Enable voice commands</button>
+      </div>
+      <div class="video">
+        <p class="placeholder">
+          Synthetic scene · enable your camera for live video
+        </p>
+        <video id="localVideo" autoplay playsinline muted hidden></video
+        ><canvas id="synthetic" width="960" height="540" hidden></canvas
+        ><span class="badge" id="device">Browser simulator</span>
+      </div>
+      <div class="subtitle">
+        <small id="source">AI GUIDE</small><span id="caption">Ready.</span>
+      </div>
+      <p id="beat" class="pulse" hidden>● CPR guidance · 110 bpm</p>
+      <p id="progress"></p>
+      <a id="reportLink" hidden>Open incident report →</a>
+      <footer>
+        Microphone/camera need localhost or trusted HTTPS. LiveKit requires
+        project credentials on the server.
+      </footer>
+    </main>
+    <script src="/static/vendor/livekit-client.js"></script>
+    <script type="module" src="/static/app.js"></script>
+  </body>
+</html>
