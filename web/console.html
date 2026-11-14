@@ -3,88 +3,92 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>FirstFive · Dispatcher</title>
-    <link rel="stylesheet" href="/static/style.css" />
+    <title>FirstFive · Dispatch</title>
+    <link rel="stylesheet" href="/static/console.css" />
   </head>
-  <body data-page="console">
-    <header>
-      <a href="/console">FirstFive <span> / dispatcher workspace</span></a>
-      <nav>
-        <a href="/caller">Caller view</a
-        ><span id="connection">Connecting…</span>
-      </nav>
+  <body data-page="console" data-phase="idle">
+    <header class="bar">
+      <strong class="brand">FirstFive</strong>
+      <span class="sim">Simulation · no real emergency services</span>
+      <span id="connection" class="conn">Connecting…</span>
+      <button id="enableSound" class="link" hidden>Enable alert sound</button>
     </header>
-    <main>
-      <p class="eyebrow">EVERY SECOND, TOGETHER</p>
-      <div class="statusbar">
+
+    <section class="state">
+      <div class="state-text">
         <h1 id="phase">Waiting for a call</h1>
-        <span class="tag">112 SIMULATION</span><time id="timer">00:00</time>
+        <time id="timer">00:00</time>
       </div>
-      <div id="error" class="notice" hidden></div>
-      <div class="controls" id="operatorControls" hidden>
-        <button id="answer">Answer call</button
-        ><button id="end" class="danger">End & prepare report</button
-        ><button id="enableSound" class="secondary">Enable alert sound</button>
+      <div class="actions" id="operatorControls" hidden>
+        <button id="answer" class="primary">Answer call</button>
+        <button id="end" class="stop">End call</button>
       </div>
-      <div class="layout">
-        <section>
-          <div class="video">
-            <div class="placeholder">
-              Live scene<br /><small>Video begins only after an alert</small>
-            </div>
-            <img id="frame" alt="Live camera feed" hidden /><span
-              class="badge"
-              id="device"
-              >Camera waiting</span
-            >
-          </div>
-          <div class="subtitle">
-            <small id="source">CALL AUDIO CAPTIONS</small
-            ><span id="caption">A shared view. A faster handover.</span>
-          </div>
-          <p id="beat" class="pulse" hidden>● CPR guidance · 110 bpm</p>
-        </section>
-        <aside class="panel">
-          <p class="eyebrow">LIVE BRIEFING</p>
-          <h2 id="situation">Ready when you need it.</h2>
-          <p id="location" class="muted">Location not provided</p>
-          <ul id="facts" class="facts"></ul>
-          <p id="scene" class="muted"></p>
-        </aside>
-      </div>
-      <div id="captionControls" hidden>
-        <input
-          id="manualCaption"
-          placeholder="Manual dispatcher caption"
-          maxlength="2000"
-        /><button id="sendCaption" class="secondary">Send caption</button>
-      </div>
-      <div id="viewerControls" hidden>
-        <label
-          ><input type="checkbox" id="speakCaptions" /> Read dispatcher captions
-          aloud (projection)</label
-        >
-      </div>
-      <p id="progress"></p>
-      <a id="reportLink" hidden>Open incident report →</a
-      ><iframe id="reportFrame" title="Incident report" hidden></iframe>
-      <h2>Intervention timeline</h2>
-      <ol id="timeline" class="timeline"></ol>
-      <details id="tools" class="tools" hidden>
-        <summary>Rehearsal controls</summary>
-        <div class="controls">
-          <button data-action="trigger">1 · Trigger</button
-          ><button data-action="answer_yes">2 · Yes</button
-          ><button data-action="answer_no">3 · No</button
-          ><button data-action="next_step">4 · Repeat prompt</button
-          ><button data-action="reset" class="secondary">0 · Reset</button>
+    </section>
+
+    <div id="error" class="notice" role="alert" hidden></div>
+
+    <main class="grid">
+      <section class="scene">
+        <div class="video">
+          <p class="placeholder">No video. The camera starts with an alert.</p>
+          <img id="frame" alt="Live camera feed" hidden />
+          <span class="badge" id="device">Camera waiting</span>
         </div>
-      </details>
-      <footer>
-        Consenting participants only. Demo records audio and selected frames
-        during an intervention. No actual emergency services are contacted.
-      </footer>
+        <p id="beat" class="beat" hidden>CPR in progress · 110 compressions/min</p>
+        <div class="caption">
+          <span id="source" class="label">Caller hears</span>
+          <p id="caption">—</p>
+        </div>
+        <form id="captionControls" class="say" hidden onsubmit="return false">
+          <input id="manualCaption" placeholder="Type an instruction for the caller" maxlength="2000" autocomplete="off" />
+          <button id="sendCaption" type="submit">Send</button>
+        </form>
+        <label id="viewerControls" class="check" hidden>
+          <input type="checkbox" id="speakCaptions" /> Read instructions aloud
+        </label>
+      </section>
+
+      <aside class="side">
+        <section>
+          <h2>Situation</h2>
+          <p id="situation" class="situation">No active incident.</p>
+          <dl class="meta">
+            <dt>Location</dt>
+            <dd id="location">Not provided</dd>
+            <dt>Scene</dt>
+            <dd id="scene">—</dd>
+          </dl>
+          <ol id="facts" class="list"></ol>
+        </section>
+        <section>
+          <h2>Timeline</h2>
+          <ol id="timeline" class="list"></ol>
+        </section>
+      </aside>
     </main>
+
+    <section class="report">
+      <p id="progress"></p>
+      <a id="reportLink" hidden>Open report</a>
+      <iframe id="reportFrame" title="Incident report" hidden></iframe>
+    </section>
+
+    <details id="tools" class="tools" hidden>
+      <summary>Rehearsal controls <span>keys 1 2 3 4 0</span></summary>
+      <div class="tool-row">
+        <button data-action="trigger">1 Trigger</button>
+        <button data-action="answer_yes">2 Yes</button>
+        <button data-action="answer_no">3 No</button>
+        <button data-action="next_step">4 Repeat</button>
+        <button data-action="reset">0 Reset</button>
+      </div>
+    </details>
+
+    <p class="fine">
+      Consenting participants only. Audio and selected frames are recorded
+      during an intervention.
+    </p>
+
     <script src="/static/vendor/livekit-client.js"></script>
     <script type="module" src="/static/app.js"></script>
   </body>

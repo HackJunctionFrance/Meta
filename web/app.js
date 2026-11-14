@@ -133,8 +133,8 @@ function connect() {
       text(
         "source",
         m.source === "ai_guide"
-          ? "AI GUIDE · FIXED SCRIPT"
-          : "112 DISPATCHER · SIMULATED",
+          ? "Guide (fixed script)"
+          : "Dispatcher",
       );
       if (m.source === "ai_guide" && state.phase === "ai_guide") {
         speak(m.text);
@@ -160,18 +160,16 @@ function connect() {
   };
 }
 function card(c = {}) {
-  text("situation", c.situation || "Ready when you need it.");
+  text("situation", c.situation || "No active incident.");
   text(
     "scene",
-    c.scene
-      ? `Visual observation · ${c.scene}`
-      : "Visual observation unavailable",
+    c.scene || "—",
   );
   text(
     "location",
     c.location?.lat !== undefined
       ? `${c.location.lat.toFixed(4)}, ${c.location.lon.toFixed(4)}`
-      : "Location not provided",
+      : "Not provided",
   );
   if ($("facts")) {
     $("facts").replaceChildren();
@@ -190,7 +188,7 @@ function render(next) {
   clockOffset = (next.server_now || Date.now()) - Date.now();
   if (previous.session_id !== next.session_id) {
     voice.reset();
-    text("caption", "Ready.");
+    text("caption", "—");
     text("progress", "");
     if ($("reportLink")) $("reportLink").hidden = true;
     if ($("reportFrame")) {
@@ -204,10 +202,11 @@ function render(next) {
     {
       idle: "Waiting for a call",
       ai_guide: "Incoming emergency",
-      connected: "Dispatcher connected",
-      ended: "Intervention complete",
+      connected: "On call",
+      ended: "Call ended",
     }[state.phase],
   );
+  document.body.dataset.phase = state.phase;
   $("phase").className =
     state.phase === "ai_guide"
       ? "incoming"
@@ -257,7 +256,7 @@ function render(next) {
   }
   if (state.subtitles?.length) {
     text("caption", state.subtitles.at(-1).text);
-    text("source", "DISPATCHER · LIVE CAPTION");
+    text("source", "Dispatcher");
   }
   if (
     producer &&
@@ -286,7 +285,7 @@ async function join() {
   }
 }
 if (operator) {
-  for (const id of ["operatorControls", "captionControls", "tools"])
+  for (const id of ["operatorControls", "captionControls", "tools", "enableSound"])
     $(id).hidden = false;
   $("answer").onclick = async () => {
     audio();
@@ -322,7 +321,7 @@ if (operator) {
   };
   $("enableSound").onclick = () => {
     beep();
-    $("enableSound").textContent = "Alert sound enabled";
+    $("enableSound").textContent = "Alert sound on";
   };
   $("sendCaption").onclick = () => {
     const input = $("manualCaption");
