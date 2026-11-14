@@ -24,26 +24,6 @@
   background: var(--ground);
   -webkit-font-smoothing: antialiased;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ground: #0f1112;
-    --card: #181b1d;
-    --ink: #eef0ef;
-    --ink-2: #b4b9bc;
-    --ink-3: #8c9296;
-    --rule: #272b2e;
-    --rule-strong: #343a3d;
-    --red: #d8342a;
-    --red-soft: #3a1714;
-    --green: #4cbf87;
-    --green-soft: #12291f;
-    --amber: #e8a33c;
-    --amber-soft: #2f2410;
-    --video: #050606;
-    --red-text: #ff8b80;
-    color-scheme: dark;
-  }
-}
 
 * { box-sizing: border-box; }
 body { margin: 0; min-height: 100vh; background: var(--ground); }

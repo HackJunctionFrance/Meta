@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="color-scheme" content="light dark" />
+    <meta name="color-scheme" content="light" />
     <title>FirstFive · Dispatch</title>
     <link rel="stylesheet" href="/static/console.css" />
   </head>
@@ -47,13 +47,6 @@
           <li data-state="todo"><b>2</b><span>Breathing normally?</span><em></em></li>
           <li data-state="todo"><b>3</b><span>Chest compressions · 110/min</span><em></em></li>
         </ol>
-        <form id="captionControls" class="say" hidden onsubmit="return false">
-          <label for="manualCaption">Message to the witness's phone</label>
-          <div class="say-row">
-            <input id="manualCaption" placeholder="Used if voice fails, e.g. Help arrives in 4 minutes" maxlength="2000" autocomplete="off" />
-            <button id="sendCaption" class="btn" type="submit">Send</button>
-          </div>
-        </form>
         <label id="viewerControls" class="check" hidden>
           <input type="checkbox" id="speakCaptions" /> Read instructions aloud
         </label>

@@ -342,7 +342,7 @@ async function join() {
 }
 if (operator) {
   for (const id of ["operatorControls", "captionControls", "tools", "enableSound"])
-    $(id).hidden = false;
+    if ($(id)) $(id).hidden = false;
   $("answer").onclick = async () => {
     audio();
     if (state.phase !== "connected") {
@@ -379,7 +379,7 @@ if (operator) {
     beep();
     $("enableSound").textContent = "Alert sound on";
   };
-  $("sendCaption").onclick = () => {
+  if ($("sendCaption")) $("sendCaption").onclick = () => {
     const input = $("manualCaption");
     if (input.value.trim()) {
       send({ type: "dispatcher_said", text: input.value, final: true });
