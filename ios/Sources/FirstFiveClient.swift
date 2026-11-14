@@ -102,7 +102,8 @@ final class FirstFiveClient: NSObject, AVSpeechSynthesizerDelegate {
 
   func prepareAudio() throws {
     let audio = AVAudioSession.sharedInstance()
-    try audio.setCategory(.playAndRecord, mode: .voiceChat, options: [.allowBluetooth])
+    // defaultToSpeaker: without glasses, play on the loudspeaker, not the earpiece.
+    try audio.setCategory(.playAndRecord, mode: .voiceChat, options: [.allowBluetooth, .defaultToSpeaker])
     try audio.setActive(true)
     if let bluetooth = audio.availableInputs?.first(where: { $0.portType == .bluetoothHFP }) {
       try audio.setPreferredInput(bluetooth)
@@ -261,6 +262,14 @@ final class FirstFiveClient: NSObject, AVSpeechSynthesizerDelegate {
 
   private func speak(_ text: String) {
     stopListening(); synthesizer.stopSpeaking(at: .immediate)
+    if room == nil {
+      // Guide prompts must be heard even with the ring/silent switch on and
+      // without glasses: playback category, loudspeaker or Bluetooth.
+      let audio = AVAudioSession.sharedInstance()
+      try? audio.setCategory(.playAndRecord, mode: .default,
+                             options: [.allowBluetooth, .allowBluetoothA2DP, .defaultToSpeaker, .duckOthers])
+      try? audio.setActive(true)
+    }
     let utterance = AVSpeechUtterance(string: text); utterance.voice = AVSpeechSynthesisVoice(language: "en-US")
     synthesizer.speak(utterance)
   }
