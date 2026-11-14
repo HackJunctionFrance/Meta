@@ -21,6 +21,8 @@ final class FirstFiveClient: NSObject, AVSpeechSynthesizerDelegate {
   var voiceCommands = false
   var speechStatus = "Voice disabled"
   var lastHeard = ""
+  var callStatus = "Call: off"
+  var audioRoute = ""
   private var requestingVoicePermission = false
   private var socket: URLSessionWebSocketTask?
   private var connectionTask: Task<Void, Never>?
@@ -40,9 +42,61 @@ final class FirstFiveClient: NSObject, AVSpeechSynthesizerDelegate {
   private var speechRestart: Task<Void, Never>?
   private var beatTask: Task<Void, Never>?
   private var reminderTask: Task<Void, Never>?
+  private var callMonitor: Task<Void, Never>?
+  @ObservationIgnored private var routeObserver: NSObjectProtocol?
   private let recognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
 
-  override init() { super.init(); synthesizer.delegate = self }
+  override init() {
+    super.init(); synthesizer.delegate = self
+    // Delivered on the main queue; shows where iOS actually sends call audio.
+    routeObserver = NotificationCenter.default.addObserver(
+      forName: AVAudioSession.routeChangeNotification, object: nil, queue: .main
+    ) { _ in Task { @MainActor in FirstFiveClient.shared.refreshRoute() } }
+  }
+
+  /// Displays the microphone and speaker iOS is using right now.
+  func refreshRoute() {
+    let route = AVAudioSession.sharedInstance().currentRoute
+    let mic = route.inputs.map(\.portName).joined(separator: ", ")
+    let sound = route.outputs.map(\.portName).joined(separator: ", ")
+    audioRoute = "Mic: \(mic.isEmpty ? "none" : mic) · Sound: \(sound.isEmpty ? "none" : sound)"
+  }
+
+  /// Sends call audio to the glasses (Bluetooth HFP) for both microphone and sound.
+  func useGlasses() {
+    let audio = AVAudioSession.sharedInstance()
+    do {
+      try audio.overrideOutputAudioPort(.none)
+      if let glasses = audio.availableInputs?.first(where: { $0.portType == .bluetoothHFP }) {
+        try audio.setPreferredInput(glasses)
+        failure = ""
+      } else {
+        failure = "Glasses audio not offered by iOS. During the call, check iPhone Bluetooth: glasses connected."
+      }
+    } catch { failure = "Audio route: \(error.localizedDescription)" }
+    refreshRoute()
+  }
+
+  /// Fallback: iPhone loudspeaker, audible even when glasses audio is unavailable.
+  func useSpeaker() {
+    do { try AVAudioSession.sharedInstance().overrideOutputAudioPort(.speaker) }
+    catch { failure = "Audio route: \(error.localizedDescription)" }
+    refreshRoute()
+  }
+
+  private func describeCall(_ call: Room) -> String {
+    let state = call.connectionState
+    var parts = ["Call: " + (state == .connected ? "connected" : state == .reconnecting ? "reconnecting" : "connecting")]
+    if let dispatcher = call.remoteParticipants.values.first {
+      let receiving = dispatcher.audioTracks.contains { $0.isSubscribed }
+      parts.append("Operator: " + (!receiving ? "joined, no audio yet" : dispatcher.isSpeaking ? "speaking" : "silent"))
+    } else {
+      parts.append("Operator: not in call")
+    }
+    let me = call.localParticipant
+    parts.append("My mic: " + (!me.isMicrophoneEnabled() ? "off" : me.isSpeaking ? "speaking" : "on"))
+    return parts.joined(separator: " · ")
+  }
 
   func prepareAudio() throws {
     let audio = AVAudioSession.sharedInstance()
@@ -179,6 +233,16 @@ final class FirstFiveClient: NSObject, AVSpeechSynthesizerDelegate {
         await call.disconnect(); return
       }
       try await call.localParticipant.setMicrophone(enabled: true)
+      // LiveKit reconfigures the audio session when the mic starts: route to the glasses again.
+      useGlasses()
+      callMonitor?.cancel()
+      callMonitor = Task { [weak self] in
+        while !Task.isCancelled {
+          guard let self, let active = self.room else { return }
+          self.callStatus = self.describeCall(active)
+          try? await Task.sleep(for: .seconds(1))
+        }
+      }
     } catch {
       if generation == voiceGeneration {
         failure = "Voice connection failed: \(error.localizedDescription)"
@@ -189,6 +253,7 @@ final class FirstFiveClient: NSObject, AVSpeechSynthesizerDelegate {
 
   private func stopVoice() {
     voiceGeneration += 1
+    callMonitor?.cancel(); callMonitor = nil; callStatus = "Call: off"
     if let call = room { room = nil; Task { await call.disconnect() } }
   }
 

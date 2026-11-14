@@ -16,3 +16,4 @@ livekit-config.json
 .env.*
 !.env.example
 .env-livekit-*
+dist/

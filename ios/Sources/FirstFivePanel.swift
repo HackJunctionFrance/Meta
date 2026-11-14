@@ -20,6 +20,12 @@ struct FirstFivePanel: View {
           Button("No") { client.answer("no") }
         }.buttonStyle(.borderedProminent)
         Text(client.caption).font(.headline)
+        Text(client.callStatus).font(.caption)
+        if !client.audioRoute.isEmpty { Text(client.audioRoute).font(.caption) }
+        HStack {
+          Button("Audio → glasses") { client.useGlasses() }
+          Button("Audio → iPhone speaker") { client.useSpeaker() }
+        }.font(.caption)
         Text(client.speechStatus).font(.caption)
         if !client.lastHeard.isEmpty { Text("Heard: \(client.lastHeard)").font(.caption) }
         if !client.failure.isEmpty { Text(client.failure).font(.caption).foregroundStyle(.orange) }
