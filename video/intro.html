@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>FirstFive intro</title>
+<link rel="stylesheet" href="fonts/geist.css" />
+<style>
+  :root {
+    --dark: #0b0c0d; --dark-2: #16181a; --on-dark: #f2f3f2; --on-dark-2: #9aa0a5;
+    --ground: #eceeed; --card: #ffffff; --ink: #121416; --ink-2: #4a5056; --ink-3: #6b7177;
+    --rule: #dfe2e1; --rule-strong: #c9cdcc; --red: #d0291d; --red-soft: #fbe9e7; --green: #17734a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: var(--dark); }
+  body { font-family: "Geist", system-ui, sans-serif; -webkit-font-smoothing: antialiased; font-feature-settings: "tnum" 1; }
+  .stage { position: absolute; inset: 0; overflow: hidden; }
+  .scene { position: absolute; inset: 0; opacity: 0; }
+  .light { position: absolute; inset: 0; background: var(--ground); clip-path: circle(0 at 50% 50%); }
+  .el { will-change: transform, opacity; }
+  .h { font-weight: 650; letter-spacing: -0.035em; line-height: 1.02; }
+  .on-dark { color: var(--on-dark); }
+  .muted-d { color: var(--on-dark-2); }
+  .ink { color: var(--ink); }
+  .ink-2 { color: var(--ink-2); }
+  .ink-3 { color: var(--ink-3); }
+  .red { color: var(--red); }
+  .abs { position: absolute; }
+
+  /* Captions (accessibility) */
+  #cap { position: absolute; left: 50%; bottom: 46px; transform: translateX(-50%); max-width: 1500px; text-align: center;
+         font-size: 30px; font-weight: 500; letter-spacing: -0.01em; padding: 10px 20px; border-radius: 10px; }
+
+  /* Shared product components */
+  .card { background: var(--card); border: 1.5px solid var(--rule); border-radius: 18px; }
+  .band { display: flex; align-items: center; gap: 24px; padding: 26px 34px; border-radius: 14px; white-space: nowrap; }
+  .band .t { font-size: 38px; font-weight: 650; letter-spacing: -0.02em; }
+  .band .c { font-size: 38px; font-weight: 400; opacity: 0.8; }
+  .band .btn { margin-left: auto; font-size: 26px; font-weight: 600; padding: 14px 26px; border-radius: 10px; }
+  .video { background: #0d0f10; border-radius: 14px; position: relative; overflow: hidden; }
+  .video .badge { position: absolute; left: 22px; top: 20px; font-size: 22px; color: #fff; background: rgba(255,255,255,.12); padding: 6px 14px; border-radius: 8px; display: flex; align-items: center; gap: 10px; }
+  .video .badge i { width: 12px; height: 12px; border-radius: 50%; background: var(--red); display: inline-block; }
+  .corner { position: absolute; width: 46px; height: 46px; border-color: rgba(255,255,255,.55); border-style: solid; }
+  .proto { display: grid; grid-template-columns: repeat(3, 1fr); }
+  .proto > div { display: grid; grid-template-columns: auto 1fr; column-gap: 24px; padding: 34px 38px; border-right: 1.5px solid var(--rule); align-items: center; }
+  .proto > div:last-child { border-right: 0; }
+  .proto b { grid-row: span 2; width: 60px; height: 60px; border-radius: 50%; border: 2.5px solid var(--rule-strong); display: grid; place-items: center; font-size: 28px; font-weight: 650; color: var(--ink-3); }
+  .proto span { white-space: nowrap; font-size: 34px; font-weight: 600; color: var(--ink-3); letter-spacing: -0.015em; }
+  .proto em { font-style: normal; font-size: 28px; color: var(--ink-3); height: 36px; }
+  .proto .done b { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .proto .done span { color: var(--ink); }
+  .proto .done em { color: var(--ink-2); font-weight: 600; }
+  .proto .cur { background: var(--red-soft); }
+  .proto .cur b { background: var(--red); border-color: var(--red); color: #fff; }
+  .proto .cur span { color: var(--ink); }
+  .proto .cur em { color: var(--red); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+
+  <!-- 1 · Collapse: ECG -->
+  <div class="scene" id="s-collapse">
+    <svg class="abs" width="1920" height="1080" viewBox="0 0 1920 1080">
+      <path id="ecg" d="" fill="none" stroke="#e0352b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" />
+      <circle id="ecgDot" r="9" fill="#ff5a4e" />
+    </svg>
+    <div class="abs h on-dark el" id="c1" style="left:150px; top:170px; font-size:104px;">A man collapses.</div>
+    <div class="abs h el" id="c2" style="left:150px; top:300px; font-size:104px; color:#ff5a4e;">His heart has stopped.</div>
+  </div>
+
+  <!-- 2 · Minutes -->
+  <div class="scene" id="s-minutes">
+    <div class="abs h on-dark el" id="m1" style="left:150px; top:200px; font-size:300px; letter-spacing:-0.05em;">−10<span style="font-size:180px">%</span></div>
+    <div class="abs on-dark el" id="m2" style="left:160px; top:530px; font-size:52px; font-weight:500; letter-spacing:-0.02em;">chance of survival, <span class="muted-d">every minute without CPR</span></div>
+    <div class="abs el" id="m3" style="left:160px; top:680px; width:1600px;">
+      <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:22px;">
+        <span class="muted-d" style="font-size:30px; font-weight:500;">Time since collapse</span>
+        <span class="on-dark" id="mClock" style="font-size:64px; font-weight:600; letter-spacing:-0.02em;">0:00</span>
+      </div>
+      <div style="height:22px; background:#25282b; border-radius:11px; overflow:hidden;"><div id="mBar" style="height:100%; width:100%; background:#e0352b; border-radius:11px;"></div></div>
+      <div style="display:flex; justify-content:space-between; margin-top:14px;" class="muted-d" id="mTicks"></div>
+    </div>
+    <div class="abs muted-d el" id="mSrc" style="right:150px; top:150px; font-size:22px;">Source: American Heart Association</div>
+  </div>
+
+  <!-- 3 · Witness -->
+  <div class="scene" id="s-witness">
+    <div class="abs h on-dark el" id="w1" style="left:150px; top:330px; font-size:96px; max-width:1600px;">The person next to him wants to help.</div>
+    <div class="abs h el" id="w2" style="left:150px; top:560px; font-size:96px; color:var(--on-dark-2);">But has never done this before.</div>
+  </div>
+
+  <!-- 4 · Blind -->
+  <div class="scene" id="s-blind">
+    <div class="abs el" id="b1" style="left:150px; top:250px; width:820px; height:190px; background:var(--dark-2); border-radius:28px; display:flex; align-items:center; gap:34px; padding:0 44px;">
+      <svg width="78" height="78" viewBox="0 0 24 24"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z" fill="#3fb37a"/></svg>
+      <div>
+        <div class="on-dark" style="font-size:40px; font-weight:600; white-space:nowrap;">Emergency call</div>
+        <div class="muted-d" id="bClock" style="font-size:32px;">00:47</div>
+      </div>
+      <div id="wave" style="margin-left:auto; display:flex; gap:7px; align-items:center; height:80px;"></div>
+    </div>
+    <div class="abs el" id="b2" style="left:1060px; top:250px; width:190px; height:190px; border-radius:28px; background:var(--dark-2); display:grid; place-items:center;">
+      <svg width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="#e0352b" stroke-width="1.8" stroke-linecap="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path d="M3 3l18 18"/></svg>
+    </div>
+    <div class="abs h on-dark el" id="b3" style="left:150px; top:560px; font-size:96px;">Voice only.</div>
+    <div class="abs h el" id="b4" style="left:150px; top:680px; font-size:96px; color:var(--on-dark-2);">The dispatcher can't see a thing.</div>
+  </div>
+
+  <!-- 5 · Reveal (light world grows from the mark) -->
+  <div class="light" id="light"></div>
+  <div class="scene" id="s-reveal" style="opacity:1">
+    <svg class="abs el" id="mark" width="160" height="160" viewBox="0 0 20 20" style="left:880px; top:460px;"><rect x="7" y="1" width="6" height="18" rx="1.5" fill="#d0291d"/><rect x="1" y="7" width="18" height="6" rx="1.5" fill="#d0291d"/></svg>
+    <div class="abs h ink el" id="word" style="left:0; width:1920px; top:640px; text-align:center; font-size:150px;">FirstFive</div>
+    <div class="abs ink-2 el" id="wordSub" style="left:0; width:1920px; top:820px; text-align:center; font-size:40px; font-weight:500; letter-spacing:-0.01em;">Emergency guidance through AI glasses</div>
+  </div>
+
+  <!-- 6 · Alert -->
+  <div class="scene" id="s-alert">
+    <div class="abs el" id="a1" style="left:120px; top:330px; width:560px; text-align:center;">
+      <svg width="520" height="210" viewBox="0 0 260 105" fill="none" stroke="#121416" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+        <rect x="18" y="22" width="96" height="62" rx="22"/><rect x="146" y="22" width="96" height="62" rx="22"/>
+        <path d="M114 44c10-8 22-8 32 0"/><path d="M18 34 4 28"/><path d="M242 34 256 28"/>
+      </svg>
+      <div id="tap" class="abs" style="left:440px; top:20px; width:90px; height:90px; border-radius:50%; border:5px solid var(--red);"></div>
+      <div class="ink" style="font-size:40px; font-weight:600; margin-top:36px; letter-spacing:-0.02em;">One tap · alert</div>
+    </div>
+    <div class="abs" id="stream" style="left:700px; top:420px; width:200px; height:20px;"></div>
+    <div class="abs card el" id="a2" style="left:900px; top:110px; width:900px; padding:20px;">
+      <div class="band" id="aBand" style="background:var(--red); color:#fff;">
+        <span class="t">Incoming emergency</span><span class="c" id="aClock">00:03</span>
+        <span class="btn" style="background:#fff; color:var(--red);">Answer call</span>
+      </div>
+      <div class="video" style="height:400px; margin-top:20px;">
+        <span class="badge"><i></i>Live · witness view</span>
+        <div class="corner" style="left:300px; top:150px; border-width:4px 0 0 4px;"></div>
+        <div class="corner" style="right:300px; top:150px; border-width:4px 4px 0 0;"></div>
+        <div class="corner" style="left:300px; bottom:100px; border-width:0 0 4px 4px;"></div>
+        <div class="corner" style="right:300px; bottom:100px; border-width:0 4px 4px 0;"></div>
+        <div style="position:absolute; left:0; right:0; bottom:40px; text-align:center; color:rgba(255,255,255,.6); font-size:24px;">First-person view from the glasses</div>
+      </div>
+    </div>
+    <div class="abs h ink el" id="a3" style="left:120px; top:820px; font-size:62px; max-width:1700px;">The dispatcher sees what the witness sees.</div>
+  </div>
+
+  <!-- 7 · Guide -->
+  <div class="scene" id="s-guide">
+    <div class="abs h ink el" id="g1" style="left:160px; top:170px; font-size:84px;">Guided, step by step.</div>
+    <div class="abs card el" id="g2" style="left:160px; top:360px; width:1600px; overflow:hidden;">
+      <div class="proto" id="proto">
+        <div><b>1</b><span>Responsive?</span><em></em></div>
+        <div><b>2</b><span>Breathing normally?</span><em></em></div>
+        <div><b>3</b><span>CPR · 110/min</span><em></em></div>
+      </div>
+    </div>
+    <div class="abs el" id="g3" style="left:160px; top:640px; display:flex; align-items:center; gap:40px;">
+      <div id="beat" style="width:120px; height:120px; border-radius:50%; background:var(--red);"></div>
+      <div>
+        <div class="h ink" style="font-size:96px;">110<span class="ink-3" style="font-size:44px; font-weight:500; letter-spacing:0"> beats / min</span></div>
+        <div class="ink-2" style="font-size:40px; font-weight:500;">Hands stay on the chest.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8 · Takeover -->
+  <div class="scene" id="s-takeover">
+    <div class="abs card el" id="t1" style="left:160px; top:130px; width:1600px; padding:22px;">
+      <div class="band" style="background:#fff; border:1.5px solid var(--rule);">
+        <span class="t" style="color:var(--green);">● On call</span><span class="c ink-3">01:12</span>
+        <span style="font-size:30px; color:var(--ink-2); display:flex; align-items:center; gap:14px;"><i id="spk" style="width:16px; height:16px; border-radius:50%; background:var(--green); display:inline-block;"></i>Dispatcher · speaking</span>
+      </div>
+    </div>
+    <div class="abs video el" id="t2" style="left:182px; top:330px; width:880px; height:495px;">
+      <span class="badge"><i></i>Live · witness view</span>
+      <div id="ring" class="abs" style="width:150px; height:150px; border-radius:50%; border:5px solid #ff5a4e;"></div>
+      <div id="ringLbl" class="abs" style="color:#fff; font-size:24px; font-weight:600;">Lower</div>
+    </div>
+    <div class="abs el" id="t3" style="left:1130px; top:380px; width:640px;">
+      <div class="ink-3" style="font-size:28px; font-weight:600; margin-bottom:18px;">Dispatcher</div>
+      <div class="h ink" style="font-size:58px; line-height:1.12;">“Move your hands lower. Lock your elbows.”</div>
+    </div>
+    <div class="abs h ink el" id="t4" style="left:160px; top:880px; font-size:56px;">Real-time correction, because they can see.</div>
+  </div>
+
+  <!-- 9 · Report -->
+  <div class="scene" id="s-report">
+    <div class="abs card el" id="r1" style="left:260px; top:100px; width:1400px; padding:46px 54px;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div>
+          <div class="ink-3" style="font-size:26px; font-weight:600;">Incident report</div>
+          <div class="h ink" style="font-size:60px; margin-top:10px;">Suspected cardiac arrest · CPR guided</div>
+        </div>
+        <span style="font-size:22px; font-weight:600; color:var(--red); background:var(--red-soft); padding:8px 18px; border-radius:999px;">Simulation</span>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); margin-top:40px; padding-top:30px; border-top:1.5px solid var(--rule);">
+        <div><div class="ink-3" style="font-size:26px;">Alert → CPR guidance</div><div class="h ink" style="font-size:72px; margin-top:6px;" id="rv1">0:31</div></div>
+        <div style="border-left:1.5px solid var(--rule); padding-left:36px;"><div class="ink-3" style="font-size:26px;">Alert → dispatcher</div><div class="h ink" style="font-size:72px; margin-top:6px;" id="rv2">0:58</div></div>
+        <div style="border-left:1.5px solid var(--rule); padding-left:36px;"><div class="ink-3" style="font-size:26px;">Handover · MIST</div><div class="h ink" style="font-size:72px; margin-top:6px;">Ready</div></div>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-top:36px;" id="thumbs">
+        <div class="video" style="height:150px;"><span class="badge" style="font-size:18px;">+0:12</span><span style="position:absolute;left:22px;bottom:18px;color:rgba(255,255,255,.75);font-size:22px;font-weight:500;">Not responding</span></div>
+        <div class="video" style="height:150px;"><span class="badge" style="font-size:18px;">+0:24</span><span style="position:absolute;left:22px;bottom:18px;color:rgba(255,255,255,.75);font-size:22px;font-weight:500;">Not breathing</span></div>
+        <div class="video" style="height:150px;"><span class="badge" style="font-size:18px;">+0:31</span><span style="position:absolute;left:22px;bottom:18px;color:rgba(255,255,255,.75);font-size:22px;font-weight:500;">CPR started</span></div>
+        <div class="video" style="height:150px;"><span class="badge" style="font-size:18px;">+0:58</span><span style="position:absolute;left:22px;bottom:18px;color:rgba(255,255,255,.75);font-size:22px;font-weight:500;">Dispatcher on call</span></div>
+      </div>
+    </div>
+    <div class="abs h ink el" id="r2" style="left:260px; top:850px; font-size:56px;">Ready before the ambulance is.</div>
+  </div>
+
+  <!-- 10 · Trust -->
+  <div class="scene" id="s-trust">
+    <div class="abs" style="left:200px; top:230px;">
+      <div class="el" id="tr1" style="display:flex; align-items:center; gap:36px; margin-bottom:70px;"><svg width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="#121416" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span class="h ink" style="font-size:84px;">Consent first.</span></div>
+      <div class="el" id="tr2" style="display:flex; align-items:center; gap:36px; margin-bottom:70px;"><svg width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="#121416" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span class="h ink" style="font-size:84px;">Recording only during an emergency.</span></div>
+      <div class="el" id="tr3" style="display:flex; align-items:center; gap:36px;"><svg width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="#121416" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg><span class="h ink" style="font-size:84px;">Built on Meta's Device Access Toolkit.</span></div>
+    </div>
+  </div>
+
+  <!-- 11 · Impact -->
+  <div class="scene" id="s-impact">
+    <div class="abs h el red" id="i1" style="left:150px; top:150px; font-size:330px; letter-spacing:-0.06em;">×2</div>
+    <div class="abs h ink el" id="i2" style="left:160px; top:520px; font-size:76px;">Bystander CPR can more than double survival.</div>
+    <div class="abs h ink-2 el" id="i3" style="left:160px; top:660px; font-size:76px;">FirstFive makes sure it starts in time.</div>
+    <div class="abs ink-3 el" id="iSrc" style="right:150px; top:150px; font-size:22px;">Sources: Harvard Health Publishing, American Heart Association</div>
+  </div>
+
+  <!-- 12 · End -->
+  <div class="scene" id="s-end">
+    <svg class="abs el" id="eMark" width="120" height="120" viewBox="0 0 20 20" style="left:900px; top:300px;"><rect x="7" y="1" width="6" height="18" rx="1.5" fill="#d0291d"/><rect x="1" y="7" width="18" height="6" rx="1.5" fill="#d0291d"/></svg>
+    <div class="abs h ink el" id="e1" style="left:0; width:1920px; top:450px; text-align:center; font-size:150px;">FirstFive</div>
+    <div class="abs ink-2 el" id="e2" style="left:0; width:1920px; top:640px; text-align:center; font-size:46px; font-weight:500; letter-spacing:-0.015em;">The first five minutes, together.</div>
+    <div class="abs ink-3 el" id="e3" style="left:0; width:1920px; top:900px; text-align:center; font-size:28px; font-weight:500;">Live demo →</div>
+  </div>
+
+  <div id="cap"></div>
+</div>
+
+<script>
+const TL = window.TL || {};
+const $ = (id) => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const outExpo = (x) => (x >= 1 ? 1 : 1 - Math.pow(2, -10 * x));
+const inOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const S = (k) => TL[k].start;
+const E = (k) => TL[k].start + TL[k].dur;
+
+// Reveal an element at time a (rise + fade), optionally hide at b.
+function show(id, t, a, b = 1e9, dy = 28, dur = 0.7) {
+  const el = $(id);
+  const pin = outExpo(prog(t, a, a + dur));
+  const pout = prog(t, b, b + 0.35);
+  el.style.opacity = (pin * (1 - pout)).toFixed(3);
+  el.style.transform = `translateY(${((1 - pin) * dy - pout * 10).toFixed(2)}px)`;
+}
+function scene(id, t, a, b, fade = 0.35) {
+  const el = $(id);
+  const o = Math.min(prog(t, a - 0.001, a + 0.001 + 0.0001), 1 - prog(t, b - fade, b));
+  el.style.opacity = t >= a && t <= b ? (1 - prog(t, b - fade, b)).toFixed(3) : 0;
+  el.style.visibility = t >= a - 0.01 && t <= b + 0.01 ? "visible" : "hidden";
+}
+
+// ECG path: beats then flatline
+const ECG_Y = 760, BEATS = [300, 680, 1060];
+function ecgPath() {
+  let d = `M 0 ${ECG_Y}`;
+  for (const x of BEATS) {
+    d += ` L ${x - 60} ${ECG_Y} L ${x - 40} ${ECG_Y - 18} L ${x - 25} ${ECG_Y} L ${x - 10} ${ECG_Y} L ${x} ${ECG_Y - 170} L ${x + 14} ${ECG_Y + 70} L ${x + 30} ${ECG_Y} L ${x + 70} ${ECG_Y - 26} L ${x + 100} ${ECG_Y}`;
+  }
+  return d + ` L 1920 ${ECG_Y}`;
+}
+$("ecg").setAttribute("d", ecgPath());
+const ECG_LEN = $("ecg").getTotalLength();
+$("ecg").style.strokeDasharray = ECG_LEN;
+const ECG_T0 = 0.15, ECG_T1 = () => S("collapse") + 2.6; // drawing window
+
+for (let i = 0; i <= 5; i++) {
+  const s = document.createElement("span");
+  s.textContent = `${i} min`; s.style.fontSize = "26px"; $("mTicks").append(s);
+}
+for (let i = 0; i < 22; i++) {
+  const b = document.createElement("i");
+  b.style.cssText = "display:block;width:7px;border-radius:4px;background:#3fb37a;height:20px";
+  $("wave").append(b);
+}
+for (let i = 0; i < 6; i++) {
+  const d = document.createElement("i");
+  d.style.cssText = "position:absolute;top:2px;width:16px;height:16px;border-radius:50%;background:#d0291d";
+  $("stream").append(d);
+}
+const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+
+function render(t) {
+  const reveal = S("reveal");
+  document.body.style.background = "#0b0c0d";
+
+  // 1 · collapse
+  scene("s-collapse", t, 0, S("minutes") - 0.15);
+  const pe = prog(t, ECG_T0, ECG_T1());
+  $("ecg").style.strokeDashoffset = ECG_LEN * (1 - pe);
+  const pt = $("ecg").getPointAtLength(ECG_LEN * pe);
+  $("ecgDot").setAttribute("cx", pt.x); $("ecgDot").setAttribute("cy", pt.y);
+  $("ecgDot").style.opacity = pe > 0 && pe < 1 ? 1 : 0;
+  show("c1", t, S("collapse"));
+  show("c2", t, S("collapse") + 1.15);
+
+  // 2 · minutes
+  scene("s-minutes", t, S("minutes") - 0.15, S("witness") - 0.15);
+  show("m1", t, S("minutes"), 1e9, 40, 0.9);
+  show("m2", t, S("minutes") + 0.5);
+  show("m3", t, S("minutes") + 0.9);
+  show("mSrc", t, S("minutes") + 1.2, 1e9, 10);
+  const pm = inOut(prog(t, S("minutes") + 1.1, E("minutes") + 0.4));
+  $("mClock").textContent = fmt(pm * 300);
+  $("mBar").style.width = `${100 - pm * 50}%`;
+
+  // 3 · witness
+  scene("s-witness", t, S("witness") - 0.15, S("blind") - 0.15);
+  show("w1", t, S("witness"));
+  show("w2", t, S("witness") + 1.7);
+  const j = prog(t, S("witness") + 1.7, S("witness") + 4);
+  $("w2").style.transform += ` translateX(${(Math.sin(t * 47) * 2.2 * j).toFixed(2)}px)`;
+
+  // 4 · blind
+  scene("s-blind", t, S("blind") - 0.15, reveal + 0.15, 0.45);
+  show("b1", t, S("blind"));
+  show("b2", t, S("blind") + 1.7, 1e9, 20);
+  show("b3", t, S("blind") + 0.3);
+  show("b4", t, S("blind") + 1.9);
+  $("bClock").textContent = `00:${String(47 + Math.max(0, Math.floor(t - S("blind")))).padStart(2, "0")}`;
+  [...$("wave").children].forEach((b, i) => {
+    const h = 14 + Math.abs(Math.sin(t * 7.3 + i * 0.9) * Math.sin(t * 2.1 + i * 0.37)) * 62;
+    b.style.height = `${h.toFixed(1)}px`;
+  });
+
+  // 5 · reveal
+  const pMark = outExpo(prog(t, reveal + 0.2, reveal + 0.9));
+  const pLight = inOut(prog(t, reveal + 0.55, reveal + 1.45));
+  $("light").style.clipPath = `circle(${(pLight * 1250).toFixed(1)}px at 50% 50%)`;
+  const markOut = prog(t, S("alert") - 0.3, S("alert") + 0.1);
+  $("mark").style.opacity = (pMark * (1 - markOut)).toFixed(3);
+  const markY = -inOut(prog(t, reveal + 0.9, reveal + 1.5)) * 120;
+  $("mark").style.transform = `translateY(${markY}px) scale(${(0.4 + 0.6 * pMark).toFixed(3)})`;
+  show("word", t, reveal + 1.0, S("alert") - 0.3, 30, 0.8);
+  show("wordSub", t, reveal + 1.35, S("alert") - 0.3, 20, 0.8);
+  $("s-reveal").style.visibility = t > reveal - 0.2 && t < S("alert") + 0.2 ? "visible" : "hidden";
+
+  // 6 · alert
+  scene("s-alert", t, S("alert") - 0.2, S("guide") - 0.15);
+  show("a1", t, S("alert"));
+  const tap = prog(t, S("alert") + 0.9, S("alert") + 1.8);
+  $("tap").style.opacity = tap > 0 && tap < 1 ? (1 - tap).toFixed(3) : 0;
+  $("tap").style.transform = `scale(${(0.5 + tap * 1.3).toFixed(3)})`;
+  const ps = prog(t, S("alert") + 1.4, S("guide"));
+  [...$("stream").children].forEach((d, i) => {
+    const x = ((ps * 6 + i / 6) % 1) * 200;
+    d.style.left = `${x}px`; d.style.opacity = ps > 0 ? (Math.sin((x / 200) * Math.PI)).toFixed(2) : 0;
+  });
+  show("a2", t, S("alert") + 1.5, 1e9, 40, 0.9);
+  $("aClock").textContent = `00:0${Math.min(9, 3 + Math.max(0, Math.floor(t - S("alert") - 1.5)))}`;
+  show("a3", t, S("alert") + 3.6);
+
+  // 7 · guide
+  scene("s-guide", t, S("guide") - 0.15, S("takeover") - 0.15);
+  show("g1", t, S("guide"));
+  show("g2", t, S("guide") + 0.3, 1e9, 30);
+  const g = S("guide"), cells = [...$("proto").children];
+  const states = [
+    t < g + 0.6 ? "" : t < g + 1.9 ? "cur" : "done",
+    t < g + 1.9 ? "" : t < g + 3.2 ? "cur" : "done",
+    t < g + 3.2 ? "" : "cur",
+  ];
+  const texts = [
+    states[0] === "cur" ? "Asking now" : states[0] === "done" ? "No" : "",
+    states[1] === "cur" ? "Asking now" : states[1] === "done" ? "No" : "",
+    states[2] === "cur" ? "Guiding" : "",
+  ];
+  cells.forEach((c, i) => { c.className = states[i]; c.querySelector("em").textContent = texts[i]; });
+  show("g3", t, g + 3.3);
+  const bt = Math.max(0, t - (g + 3.3)) % (60 / 110);
+  const pulse = Math.exp(-bt * 9);
+  $("beat").style.transform = `scale(${(0.82 + 0.18 * pulse).toFixed(3)})`;
+  $("beat").style.opacity = (0.75 + 0.25 * pulse).toFixed(3);
+
+  // 8 · takeover
+  scene("s-takeover", t, S("takeover") - 0.15, S("report") - 0.15);
+  const k = S("takeover");
+  show("t1", t, k);
+  show("t2", t, k + 0.3, 1e9, 30);
+  show("t3", t, k + 0.8);
+  show("t4", t, k + 2.4);
+  const pr = inOut(prog(t, k + 1.2, k + 2.4));
+  $("ring").style.left = "365px"; $("ring").style.top = `${(90 + pr * 170).toFixed(1)}px`;
+  $("ringLbl").style.left = "530px"; $("ringLbl").style.top = `${(145 + pr * 170).toFixed(1)}px`;
+  $("ring").style.opacity = $("ringLbl").style.opacity = prog(t, k + 0.9, k + 1.2).toFixed(2);
+  $("spk").style.transform = `scale(${(1 + 0.35 * Math.abs(Math.sin(t * 6))).toFixed(3)})`;
+
+  // 9 · report
+  scene("s-report", t, S("report") - 0.15, S("trust") - 0.15);
+  show("r1", t, S("report"), 1e9, 60, 1.0);
+  show("r2", t, S("report") + 1.6);
+
+  // 10 · trust
+  scene("s-trust", t, S("trust") - 0.15, S("impact") - 0.15);
+  show("tr1", t, S("trust"));
+  show("tr2", t, S("trust") + 1.3);
+  show("tr3", t, S("trust") + 3.4);
+
+  // 11 · impact
+  scene("s-impact", t, S("impact") - 0.15, S("end") - 0.15);
+  show("i1", t, S("impact"), 1e9, 40, 0.9);
+  show("i2", t, S("impact") + 0.4);
+  show("i3", t, S("impact") + 3.0);
+  show("iSrc", t, S("impact") + 1.0, 1e9, 10);
+
+  // 12 · end
+  scene("s-end", t, S("end") - 0.2, 1e9);
+  show("eMark", t, S("end") - 0.1, 1e9, 20, 0.8);
+  show("e1", t, S("end") + 0.15, 1e9, 30, 0.9);
+  show("e2", t, S("end") + 1.1);
+  show("e3", t, S("end") + 2.4, 1e9, 12);
+
+  // Captions follow the voice
+  let cap = "";
+  for (const key in TL) {
+    if (key[0] === "_") continue;
+    if (t >= S(key) - 0.05 && t <= E(key) + 0.25) cap = TL[key].text;
+  }
+  const c = $("cap");
+  const dark = t < reveal + 1.0;
+  c.textContent = cap;
+  c.style.opacity = cap && !["end", "reveal"].some((k) => t >= S(k) - 0.05 && t <= E(k) + 0.25) ? 1 : 0;
+  c.style.color = dark ? "#c9ced2" : "#4a5056";
+}
+window.render = render;
+window.ecgEvents = () => {
+  const path = $("ecg"), out = { beats: [], flat: 0 };
+  const T1 = ECG_T1(), at = (len) => ECG_T0 + (len / ECG_LEN) * (T1 - ECG_T0);
+  let i = 0;
+  for (let len = 0; len <= ECG_LEN && i <= BEATS.length; len += 2) {
+    const x = path.getPointAtLength(len).x;
+    if (i < BEATS.length && x >= BEATS[i]) { out.beats.push(at(len)); i++; }
+    else if (i === BEATS.length && x >= BEATS[BEATS.length - 1] + 120) { out.flat = at(len); i++; }
+  }
+  out.end = T1;
+  return out;
+};
+</script>
+</body>
+</html>

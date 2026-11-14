@@ -1,0 +1,14 @@
+[
+ ["collapse", "A man collapses. His heart has stopped."],
+ ["minutes", "Every minute without CPR, his chance of survival drops by up to ten percent."],
+ ["witness", "The person next to him wants to help, but has never done this before."],
+ ["blind", "On the phone, the dispatcher can guide them. But they can't see a thing."],
+ ["reveal", "This is FirstFive."],
+ ["alert", "With AI glasses from Meta, one tap raises the alert, and the dispatcher sees exactly what the witness sees."],
+ ["guide", "A voice guide checks if he responds and breathes, then starts CPR on the beat. Hands stay on the chest."],
+ ["takeover", "The dispatcher takes over, and corrects the hands in real time."],
+ ["report", "When the ambulance arrives, the handover report is already waiting."],
+ ["trust", "Consent first. Recording only during an emergency. Built on Meta's Device Access Toolkit."],
+ ["impact", "Bystander CPR can more than double survival. FirstFive makes sure it starts in time."],
+ ["end", "FirstFive. The first five minutes, together."]
+]
