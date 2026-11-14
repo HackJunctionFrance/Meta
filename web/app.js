@@ -369,16 +369,14 @@ function startListening() {
       .toLowerCase()
       .replace(/[^a-z ]/g, "")
       .trim();
-    if (words === "emergency" && state.phase === "idle")
+    const said = (re) => new RegExp(`\\b(${re})\\b`).test(words);
+    if (said("emergency|urgence") && state.phase === "idle")
       send({ type: "alert", trigger: "voice" });
-    else if (
-      /^(yes|yeah|yep|no|nope)$/.test(words) &&
-      state.phase === "ai_guide"
-    )
+    else if (said("yes|yeah|yep|yup|oui|ouais|no|nope|nah|non|nan") && state.phase === "ai_guide")
       send({
         type: "answer",
         step_id: state.step,
-        value: /^(yes|yeah|yep)$/.test(words) ? "yes" : "no",
+        value: said("yes|yeah|yep|yup|oui|ouais") ? "yes" : "no",
       });
   };
   rec.onerror = (e) => {

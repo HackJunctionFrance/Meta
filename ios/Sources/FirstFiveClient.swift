@@ -331,7 +331,12 @@ final class FirstFiveClient: NSObject, AVSpeechSynthesizerDelegate {
     guard voiceCommands, ["idle", "ai_guide"].contains(phase), !synthesizer.isSpeaking else { return }
     do {
       try prepareAudio()
-      let request = SFSpeechAudioBufferRecognitionRequest(); request.shouldReportPartialResults = false; self.request = request
+      let request = SFSpeechAudioBufferRecognitionRequest(); self.request = request
+      // Act on the first partial result containing an answer: in a noisy place the
+      // recognizer may never decide the sentence is "final".
+      request.shouldReportPartialResults = true
+      request.taskHint = .confirmation
+      request.contextualStrings = ["yes", "no", "oui", "non", "emergency"]
       guard let recognizer, recognizer.isAvailable else {
         failure = "Speech recognition unavailable. Use Yes / No buttons."; stopListening(); return
       }
@@ -345,16 +350,19 @@ final class FirstFiveClient: NSObject, AVSpeechSynthesizerDelegate {
       }
       input.installTap(onBus: 0, bufferSize: 1024, format: format, block: Self.audioTap(for: request))
       microphoneTapped = true; engine.prepare(); try engine.start()
-      speechStatus = "Listening — say Yes or No after the question"
+      speechStatus = "Listening — say Yes / No (or Oui / Non)"
       speechTask = Self.recognize(using: recognizer, request: request) { @Sendable [weak self] text, isFinal, error in
         Task { @MainActor in
           guard let self, generation == self.speechGeneration else { return }
-          if let text, isFinal {
+          if let text, !text.isEmpty {
             self.lastHeard = text
-            let words = text.lowercased().trimmingCharacters(in: .punctuationCharacters.union(.whitespaces))
-            if words == "emergency", self.phase == "idle" { self.emergency() }
-            else if ["yes","yeah","yep","no","nope"].contains(words), self.phase == "ai_guide" {
-              self.answer(["yes","yeah","yep"].contains(words) ? "yes" : "no")
+            switch Self.intent(in: text) {
+            case "emergency"? where self.phase == "idle":
+              self.stopListening(); self.emergency(); return
+            case let value? where value != "emergency" && self.phase == "ai_guide":
+              // Listening resumes after the next spoken prompt.
+              self.stopListening(); self.answer(value); return
+            default: break
             }
           }
           if let error { self.failure = "Speech recognition: \(error)" }
@@ -367,6 +375,18 @@ final class FirstFiveClient: NSObject, AVSpeechSynthesizerDelegate {
       speechRestart = Task { try? await Task.sleep(for: .seconds(50)); if !Task.isCancelled { startListening() } }
     } catch { failure = "Speech unavailable: \(error.localizedDescription)"; stopListening() }
   }
+  /// "yes" / "no" / "emergency" if any word of the utterance says so, in English or French.
+  private nonisolated static func intent(in text: String) -> String? {
+    let words = text.lowercased().components(separatedBy: CharacterSet.letters.inverted).filter { !$0.isEmpty }
+    let short = words.count <= 3 // "oui" is often transcribed "we" by the English recognizer
+    for word in words {
+      if ["yes", "yeah", "yep", "yup", "oui", "ouais"].contains(word) || (short && ["we", "wee", "whee"].contains(word)) { return "yes" }
+      if ["no", "nope", "nah", "non", "nan"].contains(word) { return "no" }
+      if ["emergency", "urgence"].contains(word) { return "emergency" }
+    }
+    return nil
+  }
+
   private func stopListening() {
     // Cancellation callbacks from an older recognizer must not stop its replacement.
     speechGeneration += 1
