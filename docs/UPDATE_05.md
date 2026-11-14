@@ -11,3 +11,7 @@ Changements iOS (`ios/Sources/FirstFiveClient.swift`, `FirstFivePanel.swift`) :
 Installation : archive `FirstFive-update-05.zip` (hors Git), `Installer-sur-Mac.command`, sauvegarde automatique, signature/.env/serveur conservés.
 
 Validation : non compilé ici (pas de Xcode sous Linux) ; noms d'API vérifiés dans le SDK LiveKit Swift 2.19.0 épinglé. Installation testée sur une copie factice.
+
+## Correctif 06
+
+Crash signalé : `Failed to create tap due to format mismatch` (micro matériel 16 kHz des lunettes, format client 48 kHz en cache). `startListening` recrée désormais `AVAudioEngine` à chaque écoute et refuse proprement un format incohérent au lieu de planter. Archive `FirstFive-update-06.zip` (inclut 05).

@@ -35,7 +35,9 @@ final class FirstFiveClient: NSObject, AVSpeechSynthesizerDelegate {
   private var frameBusy = false
   private var lastFrame = Date.distantPast
   private let synthesizer = AVSpeechSynthesizer()
-  private let engine = AVAudioEngine()
+  // Recreated for each listening session: a cached engine keeps the old mic format
+  // after a switch to the glasses (16 kHz Bluetooth) and installTap then crashes.
+  @ObservationIgnored private var engine = AVAudioEngine()
   private var speechTask: SFSpeechRecognitionTask?
   private var request: SFSpeechAudioBufferRecognitionRequest?
   private var microphoneTapped = false
@@ -334,9 +336,11 @@ final class FirstFiveClient: NSObject, AVSpeechSynthesizerDelegate {
         failure = "Speech recognition unavailable. Use Yes / No buttons."; stopListening(); return
       }
       let generation = speechGeneration
+      engine = AVAudioEngine()
       let input = engine.inputNode
       let format = input.outputFormat(forBus: 0)
-      guard format.sampleRate > 0, format.channelCount > 0 else {
+      let hardware = input.inputFormat(forBus: 0)
+      guard format.sampleRate > 0, format.channelCount > 0, format.sampleRate == hardware.sampleRate else {
         failure = "Microphone not ready. Check Bluetooth and retry Enable voice."; stopListening(); return
       }
       input.installTap(onBus: 0, bufferSize: 1024, format: format, block: Self.audioTap(for: request))
