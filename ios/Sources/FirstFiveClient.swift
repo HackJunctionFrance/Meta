@@ -260,8 +260,20 @@ final class FirstFiveClient: NSObject, AVSpeechSynthesizerDelegate {
     if let call = room { room = nil; Task { await call.disconnect() } }
   }
 
+  /// Guide audio must play even when the iPhone is in silent mode: the default
+  /// (ambient) session is muted by the ring/silent switch.
+  private func prepareGuideAudio() {
+    guard room == nil else { return } // LiveKit owns the session during a call
+    let audio = AVAudioSession.sharedInstance()
+    do {
+      try audio.setCategory(.playback, mode: .spokenAudio, options: [.duckOthers])
+      try audio.setActive(true)
+    } catch { failure = "Audio unavailable: \(error.localizedDescription)" }
+  }
+
   private func speak(_ text: String) {
     stopListening(); synthesizer.stopSpeaking(at: .immediate)
+    prepareGuideAudio()
     if room == nil {
       // Guide prompts must be heard even with the ring/silent switch on and
       // without glasses: playback category, loudspeaker or Bluetooth.
@@ -407,9 +419,38 @@ final class FirstFiveClient: NSObject, AVSpeechSynthesizerDelegate {
   }
   private func metronome() {
     guard beatTask == nil else { return }
-    beatTask = Task { while !Task.isCancelled { AudioServicesPlaySystemSound(1104); try? await Task.sleep(for: .milliseconds(545)) } }
+    prepareGuideAudio()
+    beatTask = Task { [weak self] in while !Task.isCancelled { self?.click(); try? await Task.sleep(for: .milliseconds(545)) } }
     reminderTask = Task { while !Task.isCancelled { try? await Task.sleep(for: .seconds(20)); if !Task.isCancelled { speak("Keep pushing hard and fast, follow the beat.") } } }
   }
+  // Metronome click played through the session (system sounds ignore it and are
+  // muted in silent mode).
+  @ObservationIgnored private var clickPlayer: AVAudioPlayer?
+  private func click() {
+    if clickPlayer == nil { clickPlayer = Self.makeClick() }
+    clickPlayer?.currentTime = 0
+    clickPlayer?.play()
+  }
+  private nonisolated static func makeClick() -> AVAudioPlayer? {
+    let rate = 44_100, count = rate * 40 / 1000
+    var pcm = Data()
+    for i in 0..<count {
+      let t = Double(i) / Double(rate)
+      let value = sin(2 * Double.pi * 1500 * t) * exp(-t * 90) * 0.9
+      var sample = Int16(value * Double(Int16.max)).littleEndian
+      withUnsafeBytes(of: &sample) { pcm.append(contentsOf: $0) }
+    }
+    var wav = Data()
+    func u32(_ x: UInt32) { var v = x.littleEndian; withUnsafeBytes(of: &v) { wav.append(contentsOf: $0) } }
+    func u16(_ x: UInt16) { var v = x.littleEndian; withUnsafeBytes(of: &v) { wav.append(contentsOf: $0) } }
+    wav.append(contentsOf: Array("RIFF".utf8)); u32(UInt32(36 + pcm.count)); wav.append(contentsOf: Array("WAVE".utf8))
+    wav.append(contentsOf: Array("fmt ".utf8)); u32(16); u16(1); u16(1); u32(UInt32(rate)); u32(UInt32(rate * 2)); u16(2); u16(16)
+    wav.append(contentsOf: Array("data".utf8)); u32(UInt32(pcm.count)); wav.append(pcm)
+    let player = try? AVAudioPlayer(data: wav)
+    player?.prepareToPlay()
+    return player
+  }
+
   private func stopGuide() {
     beatTask?.cancel(); beatTask = nil; reminderTask?.cancel(); reminderTask = nil
     stopListening(); synthesizer.stopSpeaking(at: .immediate)
