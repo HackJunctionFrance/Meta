@@ -19,6 +19,7 @@
         <h1 id="phase">Waiting for a call</h1>
         <time id="timer">00:00</time>
       </div>
+      <p id="voice" class="voice" hidden></p>
       <div class="actions" id="operatorControls" hidden>
         <button id="answer" class="primary">Answer call</button>
         <button id="end" class="stop">End call</button>
@@ -40,7 +41,7 @@
           <p id="caption">—</p>
         </div>
         <form id="captionControls" class="say" hidden onsubmit="return false">
-          <input id="manualCaption" placeholder="Type an instruction for the caller" maxlength="2000" autocomplete="off" />
+          <input id="manualCaption" placeholder="Backup: type a message shown on the phone" maxlength="2000" autocomplete="off" />
           <button id="sendCaption" type="submit">Send</button>
         </form>
         <label id="viewerControls" class="check" hidden>

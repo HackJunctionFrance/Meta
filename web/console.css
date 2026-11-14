@@ -91,6 +91,13 @@ body[data-phase="connected"] .state h1 { color: var(--live); }
 body[data-phase="connected"] .state h1::before { content: "● "; }
 body[data-phase="connected"] .primary { background: transparent; color: var(--ink); border-color: var(--line); font-size: 15px; padding: 10px 16px; }
 
+.voice { flex: 1; font-size: 15px; white-space: pre; }
+.voice::before { content: "● "; }
+.voice[data-level="warn"]::before { color: #d08a00; }
+.voice[data-level="silent"]::before { color: var(--muted); }
+.voice[data-level="speaking"]::before { color: var(--live); }
+body[data-phase="ai_guide"] .voice::before { color: inherit; }
+
 .notice {
   margin: 16px 24px 0;
   padding: 12px 16px;

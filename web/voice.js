@@ -1,6 +1,6 @@
 export class VoiceCall {
-  constructor({ onCaption, onError, getElapsed }) {
-    Object.assign(this, { onCaption, onError, getElapsed });
+  constructor({ onCaption, onError, getElapsed, onStatus }) {
+    Object.assign(this, { onCaption, onError, getElapsed, onStatus });
     this.recorders = new Map();
     this.audioElements = [];
     this.generation = 0;
@@ -36,7 +36,7 @@ export class VoiceCall {
           document.body.append(el);
           this.audioElements.push(el);
           el.play().catch(() =>
-            this.onError("Click Join voice to allow audio playback."),
+            this.onError("Click Reconnect audio to allow audio playback."),
           );
           if (role === "dispatcher" && participant.identity === "caller")
             this.record("caller", track.mediaStreamTrack);
@@ -53,7 +53,7 @@ export class VoiceCall {
         if (this.room !== room) return;
         this.disconnect();
         this.onError(
-          "Voice disconnected. Recordings retained; press Join / retry voice.",
+          "Voice disconnected. Recordings retained; press Reconnect audio.",
         );
       });
       try {
@@ -63,6 +63,8 @@ export class VoiceCall {
           return;
         }
         await room.localParticipant.setMicrophoneEnabled(true);
+        clearInterval(this.statusTimer);
+        this.statusTimer = setInterval(() => this.reportStatus(), 500);
         if (role === "dispatcher") {
           const pub = room.localParticipant.getTrackPublication(
             L.Track.Source.Microphone,
@@ -223,8 +225,31 @@ export class VoiceCall {
     this.activeRecorders.clear();
     this.sid = null;
   }
+  /** Who can hear whom, for the operator: other party present, sending audio, speaking. */
+  reportStatus() {
+    const room = this.room;
+    if (!room || !this.onStatus) return;
+    const other = [...room.remoteParticipants.values()][0];
+    const sending =
+      !!other &&
+      [...other.audioTrackPublications.values()].some((p) => p.track);
+    const me = room.localParticipant;
+    this.onStatus({
+      state: room.state,
+      other: !other
+        ? "absent"
+        : !sending
+          ? "no-audio"
+          : other.isSpeaking
+            ? "speaking"
+            : "silent",
+      me: !me.isMicrophoneEnabled ? "off" : me.isSpeaking ? "speaking" : "on",
+    });
+  }
   async disconnect() {
     this.generation += 1;
+    clearInterval(this.statusTimer);
+    this.onStatus?.(null);
     this.captioning = false;
     this.rec?.abort();
     for (const item of this.recorders.values()) this.stopRecording(item);

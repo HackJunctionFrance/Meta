@@ -48,6 +48,26 @@ const voice = new VoiceCall({
   onCaption: (text) => send({ type: "dispatcher_said", text, final: true }),
   onError: error,
   getElapsed: elapsed,
+  onStatus: (s) => {
+    const el = $("voice");
+    if (!el) return;
+    el.hidden = !s;
+    if (!s) return;
+    if (s.state !== "connected") {
+      el.textContent = "Audio reconnecting…";
+      el.dataset.level = "warn";
+      return;
+    }
+    el.textContent = `${
+      {
+        absent: "Glasses wearer not on audio yet",
+        "no-audio": "Glasses wearer joined · no sound received",
+        silent: "Glasses wearer · silent",
+        speaking: "Glasses wearer · speaking",
+      }[s.other]
+    }   ·   Your mic · ${s.me}`;
+    el.dataset.level = ["silent", "speaking"].includes(s.other) ? s.other : "warn";
+  },
 });
 function text(id, value) {
   if ($(id)) $(id).textContent = value;
@@ -246,7 +266,7 @@ function render(next) {
   if ($("answer")) {
     $("answer").disabled = !["ai_guide", "connected"].includes(state.phase);
     $("answer").textContent =
-      state.phase === "connected" ? "Join / retry voice" : "Answer call";
+      state.phase === "connected" ? "Reconnect audio" : "Answer call";
   }
   if ($("end")) $("end").disabled = state.phase !== "connected" || ending;
   if ($("yes")) {
