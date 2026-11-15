@@ -1,0 +1,406 @@
+<title>FirstFive Live Demo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&display=swap">
+<style>
+  /* Layout: header, then witness (glasses) on the left and dispatcher console on the right; stacks on phones.
+     Single light look on purpose: it is the console's own first-aid card world. */
+  :root {
+    --ground: #eceeed; --card: #ffffff; --ink: #121416; --ink-2: #4a5056; --ink-3: #676d73;
+    --rule: #dfe2e1; --rule-strong: #c9cdcc; --red: #c62a1e; --red-soft: #fbe9e7; --green: #17734a;
+    --amber: #a15c00; --video: #0d0f10;
+    --font: "Geist", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { background: var(--ground); color: var(--ink); }
+  body { font-family: var(--font); font-size: 15px; line-height: 1.45; -webkit-font-smoothing: antialiased;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 16px 32px; }
+  h1, h2, h3, p { margin: 0; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+  button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .wrap { max-width: 1280px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+  .tnum { font-variant-numeric: tabular-nums; }
+
+  .top { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--ink-3); }
+  .brand { display: inline-flex; align-items: center; gap: 8px; color: var(--ink); font-size: 16px; font-weight: 650; }
+  .brand svg { width: 18px; height: 18px; }
+  .sim { padding: 3px 10px; border-radius: 999px; background: var(--red-soft); color: var(--red); font-weight: 600; font-size: 12px; }
+  .intro { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; }
+  .intro h1 { font-size: clamp(22px, 3vw, 30px); font-weight: 650; letter-spacing: -0.02em; text-wrap: balance; }
+  .steps { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--ink-2); list-style: none; padding: 0; margin: 0; }
+  .steps li { display: flex; gap: 6px; align-items: baseline; }
+  .steps b { color: var(--red); }
+
+  .grid { display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 14px; align-items: start; }
+  @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+  .panel { background: var(--card); border: 1px solid var(--rule); border-radius: 12px; min-width: 0; }
+  .ph { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--rule); font-size: 13px; font-weight: 600; color: var(--ink-3); }
+
+  /* Witness */
+  .glasses { position: relative; aspect-ratio: 768 / 920; max-width: 100%; background: var(--video); overflow: hidden; }
+  .glasses video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .glasses .rec { position: absolute; left: 10px; top: 10px; display: flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 6px; background: rgba(0,0,0,.55); color: #fff; font-size: 12px; }
+  .glasses .rec i { width: 8px; height: 8px; border-radius: 50%; background: #ff5a4e; }
+  .say { position: absolute; left: 10px; right: 10px; bottom: 10px; padding: 10px 12px; border-radius: 10px; background: rgba(12,13,14,.78); color: #fff; font-size: 15px; line-height: 1.35; }
+  .say small { display: block; font-size: 11px; font-weight: 600; letter-spacing: .04em; color: #ffb3ac; text-transform: uppercase; margin-bottom: 2px; }
+  .wctl { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px; }
+  .btn { border: 1px solid var(--rule-strong); background: var(--card); border-radius: 9px; padding: 11px 14px; font-weight: 600; font-size: 15px; transition: background-color .15s, border-color .15s, opacity .15s; }
+  .btn:hover:not(:disabled) { border-color: var(--ink-3); }
+  .btn:disabled { opacity: .38; cursor: default; }
+  .btn.sos { grid-column: 1 / -1; background: var(--red); border-color: var(--red); color: #fff; font-size: 17px; padding: 14px; }
+  .btn.sos:hover:not(:disabled) { opacity: .9; }
+  .hint { padding: 0 12px 12px; font-size: 12px; color: var(--ink-3); }
+
+  /* Console */
+  .band { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 18px; padding: 14px 16px; border-bottom: 1px solid var(--rule); transition: background-color .2s, color .2s; }
+  .band h2 { font-size: 22px; font-weight: 650; letter-spacing: -0.02em; }
+  .band .timer { font-size: 22px; color: var(--ink-3); }
+  .band .acts { margin-left: auto; display: flex; gap: 8px; }
+  .btn.primary { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .btn.stop { color: var(--red); border-color: var(--red); background: transparent; }
+  [data-phase="ai_guide"] .band { background: var(--red); color: #fff; }
+  [data-phase="ai_guide"] .band .timer { color: rgba(255,255,255,.85); }
+  [data-phase="ai_guide"] .band .btn.primary { background: #fff; border-color: #fff; color: var(--red); }
+  [data-phase="connected"] .band h2 { color: var(--green); }
+  .btn.ring { animation: ring 1.1s ease-in-out infinite; }
+  @keyframes ring { 50% { box-shadow: 0 0 0 6px rgba(255,255,255,.45); } }
+  @media (prefers-reduced-motion: reduce) { .btn.ring { animation: none; } }
+  .voice { display: flex; align-items: center; gap: 8px; padding: 9px 16px; border-bottom: 1px solid var(--rule); font-size: 13px; color: var(--ink-2); min-height: 38px; }
+  .voice i { width: 8px; height: 8px; border-radius: 50%; background: var(--rule-strong); flex: none; }
+  .voice[data-on="speaking"] i { background: var(--green); }
+  .proto { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-bottom: 1px solid var(--rule); }
+  .cell { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 10px; align-items: center; padding: 12px 14px; border-left: 1px solid var(--rule); transition: background-color .2s; }
+  .cell:first-child { border-left: none; }
+  .cell b { grid-row: span 2; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--rule-strong); font-size: 12px; color: var(--ink-3); }
+  .cell span { font-size: 14px; font-weight: 600; color: var(--ink-3); }
+  .cell em { font-style: normal; font-size: 13px; color: var(--ink-3); min-height: 1.4em; }
+  .cell.done b { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .cell.done span { color: var(--ink); } .cell.done em { color: var(--ink-2); font-weight: 600; }
+  .cell.cur { background: var(--red-soft); } .cell.cur b { background: var(--red); border-color: var(--red); color: #fff; }
+  .cell.cur span { color: var(--ink); } .cell.cur em { color: var(--red); font-weight: 600; }
+  .cell.skip { opacity: .5; }
+  @media (max-width: 520px) { .proto { grid-template-columns: 1fr; } .cell { border-left: none; border-top: 1px solid var(--rule); } .cell:first-child { border-top: none; } }
+  .cbody { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  @media (max-width: 640px) { .cbody { grid-template-columns: 1fr; } }
+  .cbody section { padding: 14px 16px; min-width: 0; }
+  .cbody section + section { border-left: 1px solid var(--rule); }
+  @media (max-width: 640px) { .cbody section + section { border-left: none; border-top: 1px solid var(--rule); } }
+  h3 { font-size: 12px; font-weight: 600; color: var(--ink-3); margin-bottom: 8px; }
+  .situation { font-size: 17px; font-weight: 650; letter-spacing: -0.01em; }
+  .tl { list-style: none; margin: 8px 0 0; padding: 0; max-height: 260px; overflow-y: auto; }
+  .tl li { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 8px; padding: 6px 0; border-top: 1px solid var(--rule); font-size: 13px; }
+  .tl li:first-child { border-top: none; }
+  .tl time { color: var(--ink-3); }
+  .empty { color: var(--ink-3); font-size: 13px; }
+  .dsub { margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: var(--ground); font-size: 14px; min-height: 44px; }
+  .dsub small { display: block; font-size: 11px; font-weight: 600; color: var(--green); text-transform: uppercase; letter-spacing: .04em; }
+
+  /* Report */
+  .report { padding: 16px; border-top: 1px solid var(--rule); display: flex; flex-direction: column; gap: 12px; }
+  .report h2 { font-size: 20px; font-weight: 650; letter-spacing: -0.02em; }
+  .report p.sum { font-size: 14px; color: var(--ink-2); max-width: 75ch; }
+  .times { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--rule); padding-top: 10px; }
+  @media (max-width: 640px) { .times { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 10px; } }
+  .times div { padding-right: 10px; } .times dt { font-size: 12px; color: var(--ink-3); } .times dd { margin: 0; font-size: 20px; font-weight: 650; }
+  .mist { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 18px; font-size: 13px; }
+  @media (max-width: 640px) { .mist { grid-template-columns: 1fr; } }
+  .mist div { display: flex; gap: 8px; align-items: baseline; } .mist b { display: inline-grid; place-items: center; width: 20px; height: 20px; flex: none; border-radius: 50%; background: var(--ink); color: #fff; font-size: 11px; }
+  .note { font-size: 12px; color: var(--ink-3); }
+  .foot { font-size: 12px; color: var(--ink-3); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; }
+  .foot button { border: 0; background: none; padding: 0; text-decoration: underline; color: var(--ink-2); font-size: 12px; }
+</style>
+
+<div class="wrap" id="app" data-phase="idle">
+  <header class="top">
+    <span class="brand"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="7" y="1" width="6" height="18" rx="1.5" fill="#c62a1e"/><rect x="1" y="7" width="18" height="6" rx="1.5" fill="#c62a1e"/></svg>FirstFive</span>
+    <span>Interactive demo</span>
+    <span class="sim">Simulation · no emergency service is contacted</span>
+  </header>
+
+  <div class="intro">
+    <h1>Play both sides of an emergency call.</h1>
+    <ol class="steps">
+      <li><b>1</b> Press EMERGENCY</li>
+      <li><b>2</b> Answer the AI guide</li>
+      <li><b>3</b> Answer the call as the dispatcher</li>
+      <li><b>4</b> End the call to get the report</li>
+    </ol>
+  </div>
+
+  <div class="grid">
+    <section class="panel" aria-label="Witness wearing AI glasses">
+      <div class="ph"><span>Witness · AI glasses view</span><span id="wstate">Ready</span></div>
+      <div class="glasses">
+        <video id="pov" src="pov.mp4" muted playsinline preload="auto" aria-label="First-person view from the witness's glasses"></video>
+        <span class="rec" id="rec" hidden><i></i>Streaming to dispatch</span>
+        <p class="say" id="say" aria-live="polite"><small>You see</small>A man is lying on the floor. He is not moving.</p>
+      </div>
+      <div class="wctl">
+        <button class="btn sos" id="sos" type="button">EMERGENCY</button>
+        <button class="btn" id="yes" type="button" disabled>Yes</button>
+        <button class="btn" id="no" type="button" disabled>No</button>
+      </div>
+      <p class="hint" id="whint">Sound on. The AI guide speaks in the witness's ear.</p>
+    </section>
+
+    <section class="panel" aria-label="Dispatcher console">
+      <div class="band">
+        <h2 id="phase">Waiting for a call</h2>
+        <span class="timer tnum" id="timer">00:00</span>
+        <div class="acts">
+          <button class="btn primary" id="answer" type="button" disabled>Answer call</button>
+          <button class="btn stop" id="end" type="button" disabled>End call</button>
+        </div>
+      </div>
+      <div class="voice" id="voice" data-on="off"><i></i><span id="voicetxt">No call</span></div>
+      <div class="proto" id="proto" aria-label="Guide protocol">
+        <div class="cell" data-k="responsive"><b>1</b><span>Responsive?</span><em></em></div>
+        <div class="cell" data-k="breathing"><b>2</b><span>Breathing normally?</span><em></em></div>
+        <div class="cell" data-k="cpr"><b>3</b><span>CPR · 110/min</span><em></em></div>
+      </div>
+      <div class="cbody">
+        <section>
+          <h3>Situation</h3>
+          <p class="situation" id="situation">No active incident.</p>
+          <div class="dsub" id="dsub" aria-live="polite"><small>Dispatcher</small><span id="dsubtxt">Listening to the guide until you answer.</span></div>
+        </section>
+        <section>
+          <h3>Timeline</h3>
+          <ol class="tl" id="tl"></ol>
+          <p class="empty" id="tlempty">Events appear here as the call unfolds.</p>
+        </section>
+      </div>
+      <div class="report" id="report" hidden>
+        <div>
+          <h3>Incident report · ready for the ambulance crew</h3>
+          <h2 id="rtitle">Suspected cardiac arrest · CPR guided</h2>
+        </div>
+        <p class="sum" id="rsum"></p>
+        <dl class="times" id="rtimes"></dl>
+        <div class="mist" id="rmist"></div>
+        <p class="note">Timings measure guidance, not verified chest compressions. Built only from what happened in this call.</p>
+      </div>
+    </section>
+  </div>
+
+  <p class="foot"><span>The real prototype streams from Meta Ray-Ban Display glasses through an iPhone app to a live server. This page replays it in your browser, with the dispatcher's real voice.</span><button id="reset" type="button">Restart the demo</button></p>
+</div>
+
+<audio id="aguide" preload="auto"></audio>
+<audio id="adisp" src="dispatcher.mp3" preload="auto"></audio>
+<audio id="arep" src="report.mp3" preload="auto"></audio>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const LOOPS = { idle: [0, 4.5], guide: [5.5, 20.5], cpr: [27, 39.5] };
+const GUIDE = {
+  responsive: { src: "g_q1.mp3", text: "Okay, I can see what you see. What's going on? Is he responding?" },
+  breathing: { src: "g_q2.mp3", text: "Is he breathing normally? Look at his chest." },
+  cpr: { src: "g_cpr.mp3", text: "Put your hands in the center of his chest. Push hard and fast, follow the beat." },
+  stay: { src: "g_stay.mp3", text: "Stay with him. A dispatcher is taking your call now." },
+  handover: { src: "g_handover.mp3", text: "Keep going. A dispatcher is answering your call now." },
+};
+const DCAPS = [
+  [2.45, 4.6, "Emergency services. I can see what you see."],
+  [5.15, 7.95, "You're doing great, don't stop."],
+  [8.35, 12.6, "Your hands are a bit high. Move them down to the middle of the breastbone,"],
+  [13.25, 17.7, "between the nipples. Lock your elbows, shoulders straight above your hands,"],
+  [18.15, 20.25, "and push down five to six centimetres."],
+  [21.85, 24.3, "Let the chest come all the way back up after each push."],
+  [25.9, 26.75, "Witness: Like this?"],
+  [26.75, 28.2, "Yes, perfect, that's it."],
+  [28.5, 30.45, "An ambulance is on its way, four minutes."],
+  [32.25, 33.9, "You can stop now. Well done."],
+];
+const RCAPS = [
+  [0.4, 4.4, "The handover report is already done: no response, no normal breathing,"],
+  [4.85, 7.85, "CPR guided within seconds, the exact timeline,"],
+  [8.0, 12.2, "and key frames from his glasses. The ambulance crew knows everything"],
+  [12.2, 13.8, "before they walk in."],
+];
+let S, ac, beat, handoverTimer, loop = "idle";
+const pov = $("pov"), ag = $("aguide"), ad = $("adisp"), ar = $("arep");
+
+function fresh() {
+  return { phase: "idle", step: "responsive", t0: 0, ended: 0, events: [], answers: {}, cprAt: 0, pickAt: 0 };
+}
+const el = (t) => Math.max(0, ((S.ended || performance.now()) - S.t0) / 1000);
+const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+
+function setLoop(name) {
+  loop = name; const [a] = LOOPS[name];
+  try { pov.currentTime = a; } catch (e) {}
+  pov.play().catch(() => {});
+}
+pov.addEventListener("timeupdate", () => {
+  const [a, b] = LOOPS[loop];
+  if (pov.currentTime >= b || pov.currentTime < a - 0.5) { try { pov.currentTime = a; } catch (e) {} }
+});
+
+function event(label) {
+  S.events.push({ t: el(), label });
+  $("tlempty").hidden = true;
+  const li = document.createElement("li");
+  li.innerHTML = `<time class="tnum">+${el().toFixed(1)}s</time><span></span>`;
+  li.querySelector("span").textContent = label;
+  $("tl").append(li); $("tl").scrollTop = $("tl").scrollHeight;
+}
+
+function say(kind, text) {
+  $("say").innerHTML = `<small>${kind}</small>`;
+  $("say").append(document.createTextNode(text));
+}
+
+function speak(key) {
+  const g = GUIDE[key];
+  ag.pause(); ag.src = g.src; ag.currentTime = 0; ag.play().catch(() => {});
+  say("AI guide", g.text);
+}
+
+function startBeat() {
+  if (beat || !ac) return;
+  let next = ac.currentTime + 0.05;
+  beat = setInterval(() => {
+    while (next < ac.currentTime + 0.25) {
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.frequency.value = 1500; g.gain.setValueAtTime(0.18, next); g.gain.exponentialRampToValueAtTime(0.001, next + 0.05);
+      o.connect(g).connect(ac.destination); o.start(next); o.stop(next + 0.06);
+      next += 60 / 110;
+    }
+  }, 60);
+}
+function stopBeat() { clearInterval(beat); beat = null; }
+
+function protocol() {
+  const st = S.step, live = S.phase === "ai_guide" || S.phase === "connected";
+  const a = S.answers;
+  const map = {
+    responsive: a.responsive ? ["done", a.responsive] : st === "responsive" && live ? ["cur", "Asking now"] : ["", ""],
+    breathing: a.breathing ? ["done", a.breathing] : st === "breathing" && live ? ["cur", "Asking now"] : st === "stay" ? ["skip", "Not needed"] : ["", ""],
+    cpr: st === "cpr" ? (S.phase === "ended" ? ["done", "Done"] : ["cur", "Guiding"]) : st === "stay" ? ["skip", "Not needed"] : ["", ""],
+  };
+  document.querySelectorAll(".cell").forEach((c) => { const [cls, txt] = map[c.dataset.k]; c.className = "cell " + cls; c.querySelector("em").textContent = txt; });
+}
+
+function render() {
+  $("app").dataset.phase = S.phase;
+  $("phase").textContent = { idle: "Waiting for a call", ai_guide: "Incoming emergency", connected: "● On call", ended: "Call ended" }[S.phase];
+  $("answer").disabled = S.phase !== "ai_guide";
+  $("end").disabled = S.phase !== "connected";
+  $("sos").disabled = S.phase !== "idle";
+  const ask = S.phase === "ai_guide" && (S.step === "responsive" || S.step === "breathing");
+  $("yes").disabled = $("no").disabled = !ask;
+  $("rec").hidden = S.phase === "idle" || S.phase === "ended";
+  $("wstate").textContent = { idle: "Ready", ai_guide: "AI guide in your ear", connected: "Dispatcher on the line", ended: "Call ended" }[S.phase];
+  const suspected = S.answers.responsive === "No" && S.answers.breathing === "No";
+  $("situation").textContent = S.phase === "idle" ? "No active incident." : suspected ? "Suspected cardiac arrest · CPR guided" : "Assessment in progress";
+  protocol();
+}
+
+function unlockAudio() {
+  try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); ac.resume(); } catch (e) {}
+}
+
+$("sos").onclick = () => {
+  unlockAudio();
+  S = fresh(); S.phase = "ai_guide"; S.t0 = performance.now();
+  $("tl").replaceChildren(); $("report").hidden = true;
+  event("Simulated emergency activated by witness");
+  setLoop("guide");
+  $("voicetxt").textContent = "AI guide speaking to the witness · dispatcher not on the line yet";
+  render();
+  setTimeout(() => { if (S.phase === "ai_guide" && S.step === "responsive") speak("responsive"); }, 1200);
+};
+
+function answer(v) {
+  const step = S.step; S.answers[step] = v;
+  event(step === "responsive" ? (v === "No" ? "Not responding (reported)" : "Responding (reported)") : (v === "No" ? "Not breathing normally (reported)" : "Breathing normally (reported)"));
+  if (v === "Yes") { S.step = "stay"; speak("stay"); $("answer").classList.add("ring"); }
+  else if (step === "responsive") { S.step = "breathing"; speak("breathing"); }
+  else {
+    S.step = "cpr"; S.cprAt = el(); speak("cpr");
+    event("CPR guidance started at 110/min");
+    setLoop("cpr"); startBeat();
+    handoverTimer = setTimeout(() => {
+      if (S.phase === "ai_guide") { speak("handover"); $("answer").classList.add("ring"); }
+    }, 9000);
+  }
+  render();
+}
+$("yes").onclick = () => answer("Yes");
+$("no").onclick = () => answer("No");
+
+$("answer").onclick = () => {
+  unlockAudio(); clearTimeout(handoverTimer); stopBeat(); ag.pause();
+  $("answer").classList.remove("ring");
+  S.phase = "connected"; S.pickAt = el();
+  event("Dispatcher took over · automated guidance stopped");
+  say("Dispatcher", "On the line, seeing your view.");
+  ad.currentTime = 0; ad.play().catch(() => {});
+  render();
+};
+
+$("end").onclick = () => {
+  ad.pause(); stopBeat();
+  S.phase = "ended"; event("Intervention ended"); S.ended = performance.now();
+  pov.pause();
+  buildReport(); render();
+  $("voicetxt").textContent = "Call ended";
+  $("voice").dataset.on = "off";
+  ar.currentTime = 0; ar.play().catch(() => {});
+};
+
+function buildReport() {
+  const total = el(), labels = S.events.map((e) => e.label);
+  const ans = S.events.filter((e) => e.label.includes("(reported)"));
+  let sum = `A bystander wearing FirstFive glasses raised a simulated emergency. `;
+  if (ans.length) sum += `The witness reported the person as ${ans.map((e) => `${e.label.replace(" (reported)", "").toLowerCase()} (+${e.t.toFixed(1)} s)`).join(" and ")}. `;
+  if (S.cprAt) sum += `Chest-compression guidance at 110/min started ${S.cprAt.toFixed(1)} s after the alert. `;
+  if (S.pickAt) sum += `A dispatcher took over at +${S.pickAt.toFixed(1)} s with the witness's first-person view. `;
+  sum += `The call lasted ${total.toFixed(1)} s.`;
+  $("rsum").textContent = sum;
+  $("rtitle").textContent = S.answers.responsive === "No" && S.answers.breathing === "No" ? "Suspected cardiac arrest · CPR guided" : "Emergency assessment";
+  const rows = [["Total call", total], ["Alert → CPR guidance", S.cprAt || null], ["Alert → dispatcher", S.pickAt || null], ["CPR guidance window", S.cprAt ? total - S.cprAt : null]];
+  $("rtimes").innerHTML = rows.map(([k, v]) => `<div><dt>${k}</dt><dd class="tnum">${v == null ? "—" : v.toFixed(1) + " s"}</dd></div>`).join("");
+  const mist = [["M", "Witnessed collapse, simulated alert"], ...ans.map((e) => ["S", e.label]), ...(S.cprAt ? [["T", "CPR guidance at 110/min"]] : []), ...(S.pickAt ? [["T", "Dispatcher coached hand position live"]] : [])];
+  $("rmist").innerHTML = mist.map(([c, t]) => `<div><b>${c}</b><span>${t}</span></div>`).join("");
+  $("report").hidden = false;
+}
+
+function caption(audio, caps, target, kind) {
+  const t = audio.currentTime, c = caps.find(([a, b]) => t >= a - 0.1 && t <= b + 0.3);
+  return c ? c[2] : null;
+}
+function tick() {
+  if (S.phase !== "idle") $("timer").textContent = fmt(el());
+  if (S.phase === "connected") {
+    const c = caption(ad, DCAPS);
+    const speaking = !ad.paused && !!c;
+    $("voice").dataset.on = speaking ? "speaking" : "on";
+    $("voicetxt").textContent = speaking ? (c.startsWith("Witness:") ? "Witness · speaking   ·   Dispatcher · listening" : "Dispatcher · speaking   ·   Witness · listening") : "On call · both microphones on";
+    if (c) { $("dsubtxt").textContent = c.replace("Witness: ", ""); $("dsub").querySelector("small").textContent = c.startsWith("Witness:") ? "Witness" : "Dispatcher"; if (!c.startsWith("Witness:")) say("Dispatcher", c); }
+  }
+  if (S.phase === "ended" && !ar.paused) {
+    const c = caption(ar, RCAPS);
+    if (c) { $("dsubtxt").textContent = c; $("dsub").querySelector("small").textContent = "Dispatcher · handover"; }
+  }
+  requestAnimationFrame(tick);
+}
+
+$("reset").onclick = () => {
+  [ag, ad, ar].forEach((a) => a.pause()); stopBeat(); clearTimeout(handoverTimer);
+  S = fresh(); $("tl").replaceChildren(); $("tlempty").hidden = false; $("report").hidden = true;
+  $("timer").textContent = "00:00"; $("voicetxt").textContent = "No call"; $("voice").dataset.on = "off";
+  $("dsubtxt").textContent = "Listening to the guide until you answer."; $("dsub").querySelector("small").textContent = "Dispatcher";
+  say("You see", "A man is lying on the floor. He is not moving.");
+  $("answer").classList.remove("ring"); setLoop("idle"); render();
+};
+
+S = fresh(); render();
+pov.addEventListener("loadedmetadata", () => { try { pov.currentTime = 0.5; } catch (e) {} });
+pov.play().catch(() => {});
+requestAnimationFrame(tick);
+</script>
