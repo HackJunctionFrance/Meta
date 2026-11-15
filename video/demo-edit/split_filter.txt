@@ -1,0 +1,13 @@
+[0:v]fps=60,split=2[pv1][pv2];
+[pv1]scale=1920:2300,crop=1920:1080:0:610,boxblur=28:3,eq=brightness=-0.08:saturation=0.85,tpad=stop_mode=clone:stop_duration=15[bg];
+[pv2]scale=902:1080:flags=lanczos[pov];
+[1:v]fps=60,setpts=PTS+45.13/TB,split=3[c1][c2][c3];
+[c1]crop=920:976:62:52,scale=1018:1080:flags=lanczos[cw];
+[c3]crop=380:380:1490:650,scale=340:340:flags=lanczos,format=yuva420p,geq=lum='lum(X,Y)':cb='cb(X,Y)':cr='cr(X,Y)':a='if(gt(hypot(max(0,abs(X-170)-127),max(0,abs(Y-170)-127)),43),0,255)',fade=t=in:st=47.13:d=0.4:alpha=1[bub];
+[c2]crop=1735:976:92:52,scale=1920:1080:flags=lanczos,format=yuva420p,fade=t=in:st=81.6:d=0.35:alpha=1[cf];
+[bg][pov]overlay=x='509*(1-pow(clip((t-46.53)/0.6,0,1),2)*(3-2*clip((t-46.53)/0.6,0,1)))':y=0:eof_action=repeat[s1];
+[s1][cw]overlay=x='1920-1018*pow(clip((t-46.53)/0.6,0,1),2)*(3-2*clip((t-46.53)/0.6,0,1))':y=0:enable='gte(t,46.53)':eof_action=pass[s2];
+[s2][bub]overlay=x=1556:y=250:enable='between(t,47.13,81.95)':eof_action=pass[s3];
+[s3][cf]overlay=x=0:y=0:enable='gte(t,81.6)':eof_action=pass,format=yuv420p[v];
+[1:a]volume=15dB,adelay=45130|45130[da];
+[0:a][da]amix=inputs=2:duration=longest:normalize=0,alimiter=limit=0.95[a]
