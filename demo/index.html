@@ -1,0 +1,345 @@
+<title>FirstFive Live Demo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..700&display=swap">
+<style>
+  /* Layout: witness (glasses + phone) on the left, dispatcher console on the right; report below. Single light look, like the real console. */
+  :root {
+    --ground: #ECEEED; --card: #FFFFFF; --ink: #121416; --ink-2: #4A5056; --ink-3: #6B7177;
+    --rule: #DFE2E1; --rule-strong: #C9CDCC; --red: #C62A1E; --red-soft: #FBE9E7;
+    --green: #17734A; --green-soft: #E3F1EA; --amber: #A15C00; --view-a: #EEF0EE; --view-b: #D9DEDB;
+    --font: "Geist", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { background: var(--ground); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.45;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 32px; }
+  h1, h2, h3, p { margin: 0; }
+  h1, h2 { text-wrap: balance; }
+  button { font: inherit; cursor: pointer; }
+  button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  button:disabled { opacity: .4; cursor: default; }
+  .wrap { max-width: 1280px; margin: 0 auto; display: grid; gap: 16px; }
+  .top { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding-block: 16px 4px; font-size: 13px; color: var(--ink-3); }
+  .brand { display: inline-flex; align-items: center; gap: 8px; color: var(--ink); font-size: 16px; font-weight: 650; }
+  .brand svg { width: 16px; height: 16px; }
+  .pill { font-size: 12px; font-weight: 600; color: var(--red); background: var(--red-soft); padding: 3px 10px; border-radius: 999px; }
+  .top .right { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+  .quiet { background: none; border: 1px solid var(--rule-strong); border-radius: 8px; padding: 6px 12px; color: var(--ink-2); }
+  .intro { display: grid; gap: 6px; }
+  .intro h1 { font-size: clamp(26px, 3.4vw, 38px); letter-spacing: -0.02em; line-height: 1.1; }
+  .intro p { color: var(--ink-2); max-width: 70ch; }
+  .grid { display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 16px; align-items: start; }
+  .panel { background: var(--card); border: 1px solid var(--rule); border-radius: 12px; min-width: 0; }
+  .label { font-size: 12px; font-weight: 600; color: var(--ink-3); letter-spacing: .02em; }
+
+  /* Witness side */
+  .witness { padding: 16px; display: grid; gap: 14px; }
+  .view { position: relative; aspect-ratio: 4 / 3; border-radius: 10px; overflow: hidden; background: linear-gradient(160deg, var(--view-a), var(--view-b)); max-width: 100%; }
+  .grid3 { position: absolute; inset: 0; background:
+      linear-gradient(90deg, transparent 33.2%, rgba(20,22,24,.07) 33.2% 33.5%, transparent 33.5% 66.5%, rgba(20,22,24,.07) 66.5% 66.8%, transparent 66.8%),
+      linear-gradient(0deg, transparent 33.2%, rgba(20,22,24,.07) 33.2% 33.5%, transparent 33.5% 66.5%, rgba(20,22,24,.07) 66.5% 66.8%, transparent 66.8%); }
+  .corner { position: absolute; width: 26px; height: 26px; border: 0 solid rgba(20,22,24,.42); }
+  .rings { position: absolute; left: 50%; top: 50%; }
+  .rings i { position: absolute; width: 90px; height: 90px; margin: -45px 0 0 -45px; border-radius: 50%; border: 2px solid var(--red); opacity: 0; }
+  .rings b { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--red); }
+  .live .rings i { animation: ring 2.4s ease-out infinite; }
+  .live .rings i:nth-child(2) { animation-delay: .8s; } .live .rings i:nth-child(3) { animation-delay: 1.6s; }
+  @keyframes ring { from { transform: scale(.3); opacity: .85; } to { transform: scale(2); opacity: 0; } }
+  .vbadge { position: absolute; left: 10px; top: 10px; font-size: 12px; background: rgba(255,255,255,.85); padding: 3px 8px; border-radius: 6px; display: flex; gap: 6px; align-items: center; }
+  .vbadge i { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-3); }
+  .live .vbadge i { background: var(--red); }
+  .vnote { position: absolute; left: 0; right: 0; bottom: 10px; text-align: center; font-size: 12px; color: var(--ink-2); }
+  .ear { background: var(--ground); border-radius: 10px; padding: 12px 14px; min-height: 92px; display: grid; gap: 4px; align-content: start; }
+  .ear p { font-size: 17px; font-weight: 550; line-height: 1.35; }
+  .ear .who { font-size: 12px; font-weight: 600; color: var(--ink-3); }
+  .ear.dispatcher .who { color: var(--green); }
+  .btn { border: 1px solid var(--rule-strong); background: var(--card); color: var(--ink); border-radius: 10px; padding: 12px 16px; font-weight: 600; }
+  .btn.sos { background: var(--red); border-color: var(--red); color: #fff; font-size: 18px; padding: 16px; width: 100%; }
+  .yn { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .beat { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--red); }
+  .beat i { width: 14px; height: 14px; border-radius: 50%; background: var(--red); }
+  .beat.on i { animation: pulse .545s ease-out infinite; }
+  @keyframes pulse { from { transform: scale(1.35); } to { transform: scale(.85); } }
+
+  /* Console side */
+  .console { display: grid; }
+  .status { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 16px 18px; border-bottom: 1px solid var(--rule); border-radius: 12px 12px 0 0; transition: background-color .2s, color .2s; }
+  .status h2 { font-size: 24px; letter-spacing: -0.02em; }
+  .status time { font-size: 24px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .status .voice { font-size: 13px; color: var(--ink-2); flex: 1 1 200px; min-width: 0; }
+  .status .act { display: flex; gap: 8px; margin-left: auto; }
+  .status.incoming { background: var(--red); color: #fff; }
+  .status.incoming time, .status.incoming .voice { color: #FBE3E0; }
+  .status.incoming .primary { background: #fff; color: var(--red); border-color: #fff; }
+  .status.oncall h2 { color: var(--green); }
+  .primary { background: var(--ink); color: #fff; border: 1px solid var(--ink); border-radius: 8px; padding: 10px 18px; font-weight: 600; }
+  .stop { background: transparent; color: var(--red); border: 1px solid var(--red); border-radius: 8px; padding: 10px 18px; font-weight: 600; }
+  .cbody { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 260px); }
+  .cmain { border-right: 1px solid var(--rule); min-width: 0; }
+  .cview { aspect-ratio: 16 / 7; border-radius: 0; }
+  .proto { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--rule); }
+  .proto li { list-style: none; display: grid; grid-template-columns: auto 1fr; column-gap: 10px; padding: 12px 14px; border-left: 1px solid var(--rule); min-width: 0; }
+  .proto li:first-child { border-left: 0; }
+  .proto b { grid-row: span 2; width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--rule-strong); display: grid; place-items: center; font-size: 12px; color: var(--ink-3); }
+  .proto span { font-size: 13px; font-weight: 600; color: var(--ink-3); }
+  .proto em { font-style: normal; font-size: 12px; color: var(--ink-3); min-height: 1.4em; }
+  .proto .done b { background: var(--ink); border-color: var(--ink); color: #fff; } .proto .done span { color: var(--ink); } .proto .done em { color: var(--ink-2); font-weight: 600; }
+  .proto .cur { background: var(--red-soft); } .proto .cur b { background: var(--red); border-color: var(--red); color: #fff; } .proto .cur span { color: var(--ink); } .proto .cur em { color: var(--red); font-weight: 600; }
+  .proto ul { margin: 0; padding: 0; display: contents; }
+  .side { padding: 14px 16px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+  .side h3 { font-size: 16px; }
+  .tl { list-style: none; margin: 0; padding: 0; display: grid; font-size: 13px; }
+  .tl li { display: grid; grid-template-columns: 46px 1fr; gap: 6px; padding: 6px 0; border-top: 1px solid var(--rule); }
+  .tl li:first-child { border-top: 0; }
+  .tl time { color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .empty { color: var(--ink-3); font-size: 13px; }
+
+  /* Report */
+  .report { padding: 18px; display: grid; gap: 14px; }
+  .report h2 { font-size: 22px; letter-spacing: -0.02em; }
+  .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--rule); padding-top: 12px; }
+  .metrics div { padding: 0 12px; border-left: 1px solid var(--rule); } .metrics div:first-child { border-left: 0; padding-left: 0; }
+  .metrics dt { font-size: 12px; color: var(--ink-3); } .metrics dd { margin: 2px 0 0; font-size: 22px; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .mist { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 20px; font-size: 14px; }
+  .mist p { display: grid; grid-template-columns: 24px 1fr; gap: 8px; }
+  .mist b { width: 22px; height: 22px; border-radius: 50%; background: var(--ink); color: #fff; font-size: 11px; display: grid; place-items: center; }
+  .foot { font-size: 12px; color: var(--ink-3); max-width: 90ch; }
+  .foot a { color: var(--ink-2); }
+  @media (max-width: 860px) {
+    .grid { grid-template-columns: minmax(0, 1fr); }
+    .cbody { grid-template-columns: minmax(0, 1fr); }
+    .cmain { border-right: 0; border-bottom: 1px solid var(--rule); }
+    .proto { grid-template-columns: minmax(0, 1fr); } .proto li { border-left: 0; border-top: 1px solid var(--rule); } .proto li:first-child { border-top: 0; }
+    .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 12px; } .metrics div:nth-child(3) { border-left: 0; padding-left: 0; }
+    .mist { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (prefers-reduced-motion: reduce) { .live .rings i, .beat.on i { animation: none; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="brand"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="7" y="1" width="6" height="18" rx="1.5" fill="#C62A1E"/><rect x="1" y="7" width="18" height="6" rx="1.5" fill="#C62A1E"/></svg>FirstFive</span>
+    <span class="pill">Interactive simulation</span>
+    <span>No emergency service is contacted</span>
+    <span class="right"><button class="quiet" id="sound" type="button" aria-pressed="true">Sound on</button><button class="quiet" id="reset" type="button">Restart</button></span>
+  </header>
+
+  <section class="intro">
+    <h1>Be the witness. Watch the dispatcher take over.</h1>
+    <p>Press <b>EMERGENCY</b> on the witness side, answer the guide’s questions, then answer the call on the console. This page replays the FirstFive flow in your browser: in the real prototype the view streams live from Ray-Ban Display glasses and the dispatcher talks to the witness by voice.</p>
+  </section>
+
+  <div class="grid">
+    <!-- Witness -->
+    <section class="panel witness" aria-label="Witness: glasses and phone">
+      <p class="label">Witness · glasses + phone</p>
+      <div class="view" id="wview"><div class="grid3"></div>
+        <span class="corner" style="left:30%;top:24%;border-width:2px 0 0 2px"></span><span class="corner" style="right:30%;top:24%;border-width:2px 2px 0 0"></span>
+        <span class="corner" style="left:30%;bottom:24%;border-width:0 0 2px 2px"></span><span class="corner" style="right:30%;bottom:24%;border-width:0 2px 2px 0"></span>
+        <div class="rings"><i></i><i></i><i></i><b></b></div>
+        <span class="vbadge"><i></i><span id="wbadge">Camera ready</span></span>
+        <span class="vnote">What the glasses see</span>
+      </div>
+      <div class="ear" id="ear" aria-live="polite"><span class="who" id="earWho">In your ear</span><p id="earText">Someone collapses in front of you. Press EMERGENCY.</p></div>
+      <p class="beat" id="beat" hidden><i></i>110 compressions / min, follow the beat</p>
+      <button class="btn sos" id="sos" type="button">EMERGENCY</button>
+      <div class="yn"><button class="btn" id="yes" type="button" disabled>Yes</button><button class="btn" id="no" type="button" disabled>No</button></div>
+    </section>
+
+    <!-- Dispatcher console -->
+    <section class="panel console" aria-label="Dispatcher console">
+      <div class="status" id="status">
+        <h2 id="phase">Waiting for a call</h2><time id="clock">00:00</time>
+        <span class="voice" id="voice">Dispatcher console</span>
+        <span class="act"><button class="primary" id="answer" type="button" disabled>Answer call</button><button class="stop" id="end" type="button" disabled>End call</button></span>
+      </div>
+      <div class="cbody">
+        <div class="cmain">
+          <div class="view cview" id="cview"><div class="grid3"></div><div class="rings"><i></i><i></i><i></i><b></b></div>
+            <span class="vbadge"><i></i><span id="cbadge">No live view</span></span><span class="vnote">First-person view from the witness’s glasses</span></div>
+          <ol class="proto" id="proto">
+            <li><b>1</b><span>Responsive?</span><em></em></li>
+            <li><b>2</b><span>Breathing normally?</span><em></em></li>
+            <li><b>3</b><span>Chest compressions · 110/min</span><em></em></li>
+          </ol>
+        </div>
+        <aside class="side">
+          <p class="label">Situation</p>
+          <h3 id="situation">No active incident</h3>
+          <p class="label">Timeline</p>
+          <ol class="tl" id="timeline"><li class="empty">Events appear here as the call unfolds.</li></ol>
+        </aside>
+      </div>
+    </section>
+  </div>
+
+  <section class="panel report" id="report" hidden aria-label="Incident report">
+    <p class="label">Incident report · generated when the call ends</p>
+    <h2 id="rTitle">Suspected cardiac arrest · CPR guided</h2>
+    <p id="rSummary"></p>
+    <dl class="metrics" id="rMetrics"></dl>
+    <div class="mist" id="rMist"></div>
+  </section>
+
+  <p class="foot">FirstFive covers any emergency with the same live view, voice guide and dispatcher take-over; this demo runs the cardiac arrest protocol, the one built end to end in the prototype. Guidance follows standard first-aid steps and is a simulation, not medical advice.</p>
+</div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const PROMPTS = {
+    responsive: "Okay, I can see what you see. What's going on? Is he responding?",
+    breathing: "Is he breathing normally? Look at his chest.",
+    cpr: "Put your hands in the center of his chest. Push hard and fast, follow the beat.",
+    stay: "A dispatcher is taking your call now.",
+    handover: "Keep going. A dispatcher is answering your call now.",
+  };
+  const DISPATCHER = [
+    "Emergency services, I'm with you. I can see your hands. You're doing great, don't stop.",
+    "Your hands are a bit high. Move them down to the middle of the breastbone. Lock your elbows.",
+    "Push down five to six centimetres and let the chest come all the way back up.",
+    "Perfect, that's it. An ambulance is on its way, four minutes.",
+    "Keep going until they take over. You're not alone.",
+  ];
+  let s, timers = [], beatTimer = null, clockTimer = null, sound = true, audio = null;
+
+  const later = (ms, fn) => timers.push(setTimeout(fn, ms));
+  const secs = () => s.started ? (((s.ended || Date.now()) - s.started) / 1000) : 0;
+  const fmt = (t) => `${String(Math.floor(t / 60)).padStart(2, "0")}:${String(Math.floor(t % 60)).padStart(2, "0")}`;
+
+  function say(text, who) {
+    $("earWho").textContent = who === "dispatcher" ? "Dispatcher · live voice" : "AI guide · in your ear";
+    $("ear").className = "ear" + (who === "dispatcher" ? " dispatcher" : "");
+    $("earText").textContent = text;
+    if (!sound || !("speechSynthesis" in window)) return;
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text); u.lang = "en-US";
+      if (who === "dispatcher") { u.pitch = 0.8; u.rate = 1.0; } else { u.pitch = 1.1; u.rate = 1.0; }
+      speechSynthesis.speak(u);
+    } catch (e) { /* speech is optional */ }
+  }
+  function click() {
+    if (!sound) return;
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      const o = audio.createOscillator(), g = audio.createGain();
+      o.frequency.value = 1500; g.gain.setValueAtTime(0.12, audio.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + 0.05);
+      o.connect(g).connect(audio.destination); o.start(); o.stop(audio.currentTime + 0.06);
+    } catch (e) { /* audio is optional */ }
+  }
+  function event(label) { s.timeline.push({ t: secs(), label }); render(); }
+
+  function reset() {
+    timers.forEach(clearTimeout); timers = []; clearInterval(beatTimer); beatTimer = null;
+    try { speechSynthesis.cancel(); } catch (e) {}
+    s = { phase: "idle", step: "responsive", started: 0, ended: 0, timeline: [], answers: {}, cprAt: 0, pickupAt: 0 };
+    $("report").hidden = true;
+    $("earWho").textContent = "In your ear"; $("ear").className = "ear";
+    $("earText").textContent = "Someone collapses in front of you. Press EMERGENCY.";
+    render();
+  }
+
+  function startBeat() {
+    if (beatTimer) return;
+    beatTimer = setInterval(click, 60000 / 110);
+  }
+
+  function alert() {
+    if (s.phase !== "idle") return;
+    try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); audio.resume(); } catch (e) {}
+    s.phase = "ai_guide"; s.started = Date.now();
+    event("Emergency raised from the glasses");
+    $("earText").textContent = "Alert sent. The guide is connecting…";
+    later(2500, () => { if (s.phase === "ai_guide" && s.step === "responsive") say(PROMPTS.responsive, "ai"); });
+  }
+
+  function answer(value) {
+    if (s.phase !== "ai_guide" || !["responsive", "breathing"].includes(s.step)) return;
+    const step = s.step; s.answers[step] = value;
+    const labels = { responsive: ["Responding (reported)", "Not responding (reported)"], breathing: ["Breathing normally (reported)", "Not breathing normally (reported)"] };
+    event(labels[step][value === "yes" ? 0 : 1]);
+    s.step = value === "yes" ? "stay" : step === "responsive" ? "breathing" : "cpr";
+    if (s.step === "cpr") {
+      s.cprAt = Date.now(); event("CPR guidance started at 110/min");
+      startBeat();
+      later(9000, () => { if (s.phase === "ai_guide" && s.step === "cpr") say(PROMPTS.handover, "ai"); });
+    }
+    say(PROMPTS[s.step], "ai");
+    render();
+  }
+
+  function pickup() {
+    if (s.phase !== "ai_guide") return;
+    s.phase = "connected"; s.pickupAt = Date.now();
+    event("Dispatcher took over with the live view");
+    DISPATCHER.forEach((line, i) => later(600 + i * 5200, () => { if (s.phase === "connected") say(line, "dispatcher"); }));
+    render();
+  }
+
+  function end() {
+    if (s.phase !== "connected") return;
+    s.phase = "ended"; s.ended = Date.now();
+    timers.forEach(clearTimeout); timers = []; clearInterval(beatTimer); beatTimer = null;
+    try { speechSynthesis.cancel(); } catch (e) {}
+    event("Call ended, report generated");
+    $("earWho").textContent = "Call ended"; $("ear").className = "ear";
+    $("earText").textContent = "Help has arrived. The crew has the report.";
+    report(); render();
+  }
+
+  function report() {
+    const total = secs(), toCpr = s.cprAt ? (s.cprAt - s.started) / 1000 : null, toPick = (s.pickupAt - s.started) / 1000;
+    const suspected = s.answers.responsive === "no" && s.answers.breathing === "no";
+    $("rTitle").textContent = suspected ? "Suspected cardiac arrest · CPR guided" : "Emergency assessment";
+    const reported = s.timeline.filter((e) => e.label.endsWith("(reported)")).map((e) => `${e.label.replace(" (reported)", "").toLowerCase()} (+${e.t.toFixed(1)} s)`);
+    $("rSummary").textContent = `A bystander wearing FirstFive glasses raised an emergency. ${reported.length ? "The witness reported the person as " + reported.join(" and ") + ". " : ""}${toCpr != null ? `CPR guidance at 110/min started ${toCpr.toFixed(1)} s after the alert. ` : ""}A dispatcher took over at +${toPick.toFixed(1)} s with the witness’s first-person view. The call lasted ${total.toFixed(1)} s.`;
+    const m = [["Total call", total], ["Alert → CPR guidance", toCpr], ["Alert → dispatcher", toPick], ["CPR guidance window", toCpr != null ? total - toCpr : null]];
+    $("rMetrics").innerHTML = m.map(([k, v]) => `<div><dt>${k}</dt><dd>${v == null ? "—" : v.toFixed(1) + " s"}</dd></div>`).join("");
+    const mist = [["M", "Collapse witnessed, emergency raised from the glasses"], ["I", "No visible injury reported"], ["S", reported.length ? reported.join("; ").replace(/^./, (c) => c.toUpperCase()) : "Not assessed"], ["T", toCpr != null ? "Bystander CPR guided at 110/min, corrected live by the dispatcher" : "Guidance given, dispatcher on the line"]];
+    $("rMist").innerHTML = mist.map(([k, v]) => `<p><b>${k}</b><span>${v}</span></p>`).join("");
+    $("report").hidden = false;
+  }
+
+  function render() {
+    const live = ["ai_guide", "connected"].includes(s.phase);
+    $("wview").classList.toggle("live", live); $("cview").classList.toggle("live", live);
+    $("wbadge").textContent = live ? "Live · streaming" : s.phase === "ended" ? "Stream ended" : "Camera ready";
+    $("cbadge").textContent = live ? "Live · witness view" : "No live view";
+    const st = $("status");
+    st.className = "status" + (s.phase === "ai_guide" ? " incoming" : s.phase === "connected" ? " oncall" : "");
+    $("phase").textContent = { idle: "Waiting for a call", ai_guide: "Incoming emergency", connected: "● On call", ended: "Call ended" }[s.phase];
+    $("voice").textContent = { idle: "Dispatcher console", ai_guide: "AI guide is with the witness", connected: "Dispatcher · speaking", ended: "Report ready below" }[s.phase];
+    $("answer").disabled = s.phase !== "ai_guide"; $("end").disabled = s.phase !== "connected";
+    $("sos").disabled = s.phase !== "idle";
+    const ask = s.phase === "ai_guide" && ["responsive", "breathing"].includes(s.step);
+    $("yes").disabled = $("no").disabled = !ask;
+    $("beat").hidden = !(s.step === "cpr" && live); $("beat").classList.toggle("on", !!beatTimer);
+    const r = s.answers.responsive, b = s.answers.breathing, yn = (v) => v === "yes" ? "Yes" : v === "no" ? "No" : "";
+    const rows = [[yn(r), s.step === "responsive"], [yn(b), s.step === "breathing"], [s.step === "cpr" ? (live ? "Guiding" : "Done") : "", s.step === "cpr"]];
+    [...$("proto").children].forEach((li, i) => {
+      const [v, cur] = rows[i];
+      const state = s.phase === "idle" ? "" : cur && live ? "cur" : v ? "done" : "";
+      li.className = state; li.querySelector("em").textContent = state === "cur" && !v ? "Asking now" : (s.step === "stay" && !v && i > 0 ? "Not needed" : v);
+    });
+    $("situation").textContent = s.phase === "idle" ? "No active incident" : r === "no" && b === "no" ? "Suspected cardiac arrest · CPR guided" : "Assessment in progress";
+    const tl = $("timeline");
+    tl.innerHTML = s.timeline.length ? s.timeline.map((e) => `<li><time>+${e.t.toFixed(1)}s</time><span>${e.label}</span></li>`).join("") : '<li class="empty">Events appear here as the call unfolds.</li>';
+  }
+
+  $("sos").addEventListener("click", alert);
+  $("yes").addEventListener("click", () => answer("yes"));
+  $("no").addEventListener("click", () => answer("no"));
+  $("answer").addEventListener("click", pickup);
+  $("end").addEventListener("click", end);
+  $("reset").addEventListener("click", reset);
+  $("sound").addEventListener("click", () => {
+    sound = !sound; $("sound").textContent = sound ? "Sound on" : "Sound off"; $("sound").setAttribute("aria-pressed", String(sound));
+    if (!sound) { try { speechSynthesis.cancel(); } catch (e) {} }
+  });
+  clockTimer = setInterval(() => { $("clock").textContent = fmt(secs()); }, 250);
+  reset();
+})();
+</script>
