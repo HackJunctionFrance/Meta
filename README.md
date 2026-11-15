@@ -8,8 +8,13 @@ Built in 48 hours at **Junction 2026** for Meta's *AI Glasses for Everyone, Ever
 
 > **Simulation only.** FirstFive never contacts a real emergency service. Rehearse with consenting participants and a manikin or cushion.
 
+[![Watch the 2-minute demo video](https://img.youtube.com/vi/Uivl5qPupQU/hqdefault.jpg)](https://www.youtube.com/watch?v=Uivl5qPupQU)
+
+*▶ Watch the 2-minute demo: a real call with Ray-Ban Display glasses, from the alert to the handover report.*
+
 | Try it | Where |
 | --- | --- |
+| 2-minute video of a real call on the glasses | **<https://www.youtube.com/watch?v=Uivl5qPupQU>** |
 | Interactive demo in your browser (no install) | **<https://firstfive-demovercelapp.vercel.app/>** (source: [`demo-web/`](demo-web/)) |
 | Full prototype on your machine (no glasses needed) | [Quickstart](#quickstart-no-glasses-needed) below |
 | How it works inside | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
