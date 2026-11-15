@@ -10,3 +10,7 @@
 - Console recording t = POV t - 45.13 s (console timer flips: session = t_console + 51.683; report: not responding +25.6 s = POV 19.0 s).
 - Split from POV 46.53 s (after Recordly zoom on Answer call), console full screen from 81.6 s.
 - Filter graph: `split_filter.txt` (inputs: POV mp4, console recording). Console audio +15 dB, delayed 45.13 s.
+
+## Sequential demo (FirstFive-demo.mp4)
+
+POV 0–39.0 s (ends after "A dispatcher is answering your call now."), centred over its own blurred frame, then the console recording in full. 0.3 s fade. Filter: `sequence_filter.txt`. The split-screen version was dropped.

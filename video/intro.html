@@ -29,7 +29,16 @@
   /* Real stills from the witness's first-person video */
   .bg { position: absolute; inset: -40px; width: calc(100% + 80px); height: calc(100% + 80px); object-fit: cover; filter: blur(3px) saturate(0.9); }
   .scrim { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(8,9,10,.86) 0%, rgba(8,9,10,.62) 55%, rgba(8,9,10,.38) 100%); }
-  .shot { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .video.live { background: linear-gradient(160deg, #EEF0EE 0%, #D9DEDB 100%); }
+  .video.live .badge { color: var(--ink); background: rgba(255,255,255,.85); }
+  .live .corner { border-color: rgba(20,22,24,.42); }
+  .grid3 { position: absolute; inset: 0; background:
+      linear-gradient(90deg, transparent 33.2%, rgba(20,22,24,.07) 33.2%, rgba(20,22,24,.07) 33.5%, transparent 33.5%, transparent 66.5%, rgba(20,22,24,.07) 66.5%, rgba(20,22,24,.07) 66.8%, transparent 66.8%),
+      linear-gradient(0deg, transparent 33.2%, rgba(20,22,24,.07) 33.2%, rgba(20,22,24,.07) 33.5%, transparent 33.5%, transparent 66.5%, rgba(20,22,24,.07) 66.5%, rgba(20,22,24,.07) 66.8%, transparent 66.8%); }
+  .rings { position: absolute; left: 50%; top: 50%; }
+  .rings i { position: absolute; width: 170px; height: 170px; margin: -85px 0 0 -85px; border-radius: 50%; border: 3px solid var(--red); }
+  .rings b { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 50%; background: var(--red); }
+  .scan { position: absolute; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, rgba(208,41,29,.45), transparent); }
   .rows { position: absolute; left: 160px; top: 330px; width: 1600px; }
   .rowx { display: grid; grid-template-columns: 70px 520px 1fr; align-items: center; padding: 22px 0; border-top: 1.5px solid var(--rule); }
   .rowx:first-child { border-top: 0; }
@@ -68,13 +77,6 @@
 </head>
 <body>
 <div class="stage" id="stage">
-  <div class="abs" id="bgs" style="inset:0;">
-    <img class="bg" id="bg-s-opener" src="stills/s_12.jpg" alt="">
-    <img class="bg" id="bg-s-collapse" src="stills/s_0.5.jpg" alt="">
-    <img class="bg" id="bg-s-minutes" src="stills/s_84.jpg" alt="">
-    <img class="bg" id="bg-s-witness" src="stills/s_8.jpg" alt="">
-    <img class="bg" id="bg-s-blind" src="stills/s_1.5.jpg" alt="">
-    <div class="scrim"></div>
   </div>
 
   <!-- 0 · Opener: any emergency -->
@@ -94,8 +96,8 @@
       <path id="ecg" d="" fill="none" stroke="#e0352b" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" />
       <circle id="ecgDot" r="9" fill="#ff5a4e" />
     </svg>
-    <div class="abs h on-dark el" id="c1" style="left:150px; top:170px; font-size:104px;">A man collapses.</div>
-    <div class="abs h el" id="c2" style="left:150px; top:300px; font-size:104px; color:#ff5a4e;">His heart has stopped.</div>
+    <div class="abs h on-dark el" id="c1" style="left:150px; top:170px; font-size:96px;">For example, a man collapses.</div>
+    <div class="abs h el" id="c2" style="left:150px; top:290px; font-size:96px; color:#ff5a4e;">His heart has stopped.</div>
   </div>
 
   <!-- 2 · Minutes -->
@@ -160,14 +162,14 @@
         <span class="t">Incoming emergency</span><span class="c" id="aClock">00:03</span>
         <span class="btn" style="background:#fff; color:var(--red);">Answer call</span>
       </div>
-      <div class="video" style="height:400px; margin-top:20px;">
-        <img class="shot" src="stills/s_8.jpg" alt="">
+      <div class="video live" style="height:400px; margin-top:20px;">
+        <div class="grid3"></div><div class="scan"></div><div class="rings"><i></i><i></i><i></i><b></b></div>
         <span class="badge"><i></i>Live · witness view</span>
         <div class="corner" style="left:300px; top:150px; border-width:4px 0 0 4px;"></div>
         <div class="corner" style="right:300px; top:150px; border-width:4px 4px 0 0;"></div>
         <div class="corner" style="left:300px; bottom:100px; border-width:0 0 4px 4px;"></div>
         <div class="corner" style="right:300px; bottom:100px; border-width:0 4px 4px 0;"></div>
-        <div style="position:absolute; left:0; right:0; bottom:28px; text-align:center; color:#fff; font-size:24px; font-weight:500; text-shadow:0 1px 6px rgba(0,0,0,.7);">First-person view from the glasses</div>
+        <div style="position:absolute; left:0; right:0; bottom:28px; text-align:center; color:var(--ink-2); font-size:24px; font-weight:500;">First-person view from the glasses</div>
       </div>
     </div>
     <div class="abs h ink el" id="a3" style="left:120px; top:820px; font-size:62px; max-width:1700px;">The dispatcher sees what the witness sees.</div>
@@ -200,11 +202,11 @@
         <span style="font-size:30px; color:var(--ink-2); display:flex; align-items:center; gap:14px;"><i id="spk" style="width:16px; height:16px; border-radius:50%; background:var(--green); display:inline-block;"></i>Dispatcher · speaking</span>
       </div>
     </div>
-    <div class="abs video el" id="t2" style="left:182px; top:330px; width:880px; height:495px;">
-      <img class="shot" src="stills/s_30.jpg" alt="">
+    <div class="abs video live el" id="t2" style="left:182px; top:330px; width:880px; height:495px;">
+      <div class="grid3"></div><div class="scan"></div>
       <span class="badge"><i></i>Live · witness view</span>
       <div id="ring" class="abs" style="width:150px; height:150px; border-radius:50%; border:5px solid #ff5a4e;"></div>
-      <div id="ringLbl" class="abs" style="color:#fff; font-size:24px; font-weight:600;">Lower</div>
+      <div id="ringLbl" class="abs" style="color:var(--red); font-size:26px; font-weight:650;">↓ Lower</div>
     </div>
     <div class="abs el" id="t3" style="left:1130px; top:380px; width:640px;">
       <div class="ink-3" style="font-size:28px; font-weight:600; margin-bottom:18px;">Dispatcher</div>
@@ -242,10 +244,10 @@
         <div style="border-left:1.5px solid var(--rule); padding-left:36px;"><div class="ink-3" style="font-size:26px;">Handover · MIST</div><div class="h ink" style="font-size:72px; margin-top:6px;">Ready</div></div>
       </div>
       <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-top:36px;" id="thumbs">
-        <div class="video" style="height:150px;"><img class="shot" src="stills/s_8.jpg" alt=""><span class="badge" style="font-size:18px;">+0:12</span><span style="position:absolute;left:22px;bottom:18px;color:rgba(255,255,255,.75);font-size:22px;font-weight:500;">Not responding</span></div>
-        <div class="video" style="height:150px;"><img class="shot" src="stills/s_22.jpg" alt=""><span class="badge" style="font-size:18px;">+0:24</span><span style="position:absolute;left:22px;bottom:18px;color:rgba(255,255,255,.75);font-size:22px;font-weight:500;">Not breathing</span></div>
-        <div class="video" style="height:150px;"><img class="shot" src="stills/s_30.jpg" alt=""><span class="badge" style="font-size:18px;">+0:31</span><span style="position:absolute;left:22px;bottom:18px;color:rgba(255,255,255,.75);font-size:22px;font-weight:500;">CPR started</span></div>
-        <div class="video" style="height:150px;"><img class="shot" src="stills/s_60.jpg" alt=""><span class="badge" style="font-size:18px;">+0:58</span><span style="position:absolute;left:22px;bottom:18px;color:rgba(255,255,255,.75);font-size:22px;font-weight:500;">Dispatcher on call</span></div>
+        <div class="video live" style="height:150px;"><div class="grid3"></div><span class="badge" style="font-size:18px;">+0:12</span><span style="position:absolute;left:22px;bottom:18px;color:var(--ink-2);font-size:22px;font-weight:500;">Not responding</span></div>
+        <div class="video live" style="height:150px;"><div class="grid3"></div><span class="badge" style="font-size:18px;">+0:24</span><span style="position:absolute;left:22px;bottom:18px;color:var(--ink-2);font-size:22px;font-weight:500;">Not breathing</span></div>
+        <div class="video live" style="height:150px;"><div class="grid3"></div><span class="badge" style="font-size:18px;">+0:31</span><span style="position:absolute;left:22px;bottom:18px;color:var(--ink-2);font-size:22px;font-weight:500;">CPR started</span></div>
+        <div class="video live" style="height:150px;"><div class="grid3"></div><span class="badge" style="font-size:18px;">+0:58</span><span style="position:absolute;left:22px;bottom:18px;color:var(--ink-2);font-size:22px;font-weight:500;">Dispatcher on call</span></div>
       </div>
     </div>
     <div class="abs h ink el" id="r2" style="left:260px; top:850px; font-size:56px;">Ready before the ambulance is.</div>
@@ -338,24 +340,14 @@ function render(t) {
   const reveal = S("reveal");
   document.body.style.background = "#0b0c0d";
 
-  // Real stills behind the opening: continuous cross-fades, never a black frame
-  const wins = [["s-opener", -1, S("collapse") - 1.7], ["s-collapse", S("collapse") - 1.7, S("minutes")], ["s-minutes", S("minutes"), S("witness")], ["s-witness", S("witness"), S("blind")], ["s-blind", S("blind"), S("reveal") + 2]];
-  wins.forEach(([sid, a, b], i) => {
-    const fin = i === 0 ? 1 : clamp((t - (a - 0.3)) / 0.6);
-    const fout = i === wins.length - 1 ? 1 : 1 - clamp((t - (b - 0.3)) / 0.6);
-    const el = $("bg-" + sid);
-    el.style.opacity = Math.min(fin, fout).toFixed(3);
-    el.style.transform = `scale(${(1.02 + 0.06 * prog(t, a - 0.3, b + 0.3)).toFixed(4)})`;
-  });
-  $("bgs").style.visibility = t < S("reveal") + 2 ? "visible" : "hidden";
 
   // 1 · collapse
   // 0 · opener (words follow the voice)
-  scene("s-opener", t, 0, S("collapse") - 1.75);
+  scene("s-opener", t, 0, S("collapse") - 0.1, 0.3);
   const o = S("opener"), od = TL.opener.dur, otext = TL.opener.text;
-  show("o1", t, o, 1e9, 30, 0.9);
+  show("o1", t, 0.1, S("collapse") - 0.45, 30, 0.9);
   [["o2", "A fire"], ["o3", "a flood"], ["o4", "a deep cut"], ["o5", "a heart"]].forEach(([id, w]) =>
-    show(id, t, o + od * (otext.indexOf(w) / otext.length) - 0.1, 1e9, 18, 0.5));
+    show(id, t, o + od * (otext.indexOf(w) / otext.length) - 0.1, S("collapse") - 2.0, 18, 0.5));
   scene("s-collapse", t, S("collapse") - 1.75, S("minutes") - 0.15);
   const pe = prog(t, ECG_T0, ECG_T1());
   $("ecg").style.strokeDashoffset = ECG_LEN * (1 - pe);
@@ -363,7 +355,7 @@ function render(t) {
   $("ecgDot").setAttribute("cx", pt.x); $("ecgDot").setAttribute("cy", pt.y);
   $("ecgDot").style.opacity = pe > 0 && pe < 1 ? 1 : 0;
   show("c1", t, S("collapse"));
-  show("c2", t, S("collapse") + 1.15);
+  show("c2", t, S("collapse") + 1.9);
 
   // 2 · minutes
   scene("s-minutes", t, S("minutes") - 0.15, S("witness") - 0.15);
@@ -501,6 +493,16 @@ function render(t) {
   c.style.color = dark ? "#c9ced2" : "#4a5056";
 }
 window.render = render;
+const liveAnim = (t) => {
+  document.querySelectorAll(".rings").forEach((r) => [...r.querySelectorAll("i")].forEach((ring, k) => {
+    const ph = (t * 0.55 + k / 3) % 1;
+    ring.style.transform = `scale(${(0.3 + ph * 1.7).toFixed(3)})`;
+    ring.style.opacity = ((1 - ph) * 0.85).toFixed(3);
+  }));
+  document.querySelectorAll(".scan").forEach((sc) => { sc.style.top = `${(((t * 0.22) % 1) * 100).toFixed(2)}%`; });
+};
+const _render = render;
+window.render = (t) => { _render(t); liveAnim(t); };
 window.ecgEvents = () => {
   const path = $("ecg"), out = { beats: [], flat: 0 };
   const T1 = ECG_T1(), at = (len) => ECG_T0 + (len / ECG_LEN) * (T1 - ECG_T0);
