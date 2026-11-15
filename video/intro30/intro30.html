@@ -79,12 +79,7 @@
 <div class="stage" id="stage">
   <!-- 0 · Opener: any emergency -->
   <div class="scene" id="s-opener">
-    <div class="abs h on-dark el" id="o1" style="left:150px; top:250px; font-size:96px; max-width:1620px;">Every day, people face emergencies they were never trained for.</div>
-    <div class="abs" style="left:150px; top:620px; display:flex; gap:56px; font-size:54px; font-weight:600; letter-spacing:-0.02em;">
-      <span class="el on-dark" id="o2">A heart stops.</span>
-      <span class="el on-dark" id="o3">A deep cut.</span>
-      <span class="el" id="o4" style="color:#ff5a4e;">An earthquake.</span>
-    </div>
+    <div class="abs h on-dark el" id="o1" style="left:150px; top:360px; font-size:110px; max-width:1640px;">Every day, people face emergencies they were never trained for.</div>
   </div>
 
   <!-- 5 · Reveal (light world grows from the mark) -->
@@ -121,7 +116,7 @@
         <div style="position:absolute; left:0; right:0; bottom:28px; text-align:center; color:var(--ink-2); font-size:24px; font-weight:500;">First-person view from the glasses</div>
       </div>
     </div>
-    <div class="abs h ink el" id="a3" style="left:120px; top:820px; font-size:62px; max-width:1700px;">The dispatcher sees what you see. A voice guides you.</div>
+    <div class="abs h ink el" id="a3" style="left:120px; top:820px; font-size:62px; max-width:1700px;">The dispatcher sees what you see.</div>
   </div>
 
   <!-- 8b · Any emergency -->
@@ -134,6 +129,25 @@
       <div class="rowx el" id="sc3"><i>3</i><b>Choking</b><span>Five firm blows between the shoulders</span></div>
       <div class="rowx el" id="sc4"><i>4</i><b>Earthquake</b><span>Drop, cover, hold on</span></div>
       <div class="rowx el" id="sc5"><i>5</i><b>Flood or tsunami</b><span>Move to high ground, now</span></div>
+    </div>
+  </div>
+
+  <!-- 7 · Guide -->
+  <div class="scene" id="s-guide">
+    <div class="abs h ink el" id="g1" style="left:160px; top:170px; font-size:76px; max-width:1600px;">Until a dispatcher answers, an AI guides you.</div>
+    <div class="abs card el" id="g2" style="left:160px; top:360px; width:1600px; overflow:hidden;">
+      <div class="proto" id="proto">
+        <div><b>1</b><span>Responsive?</span><em></em></div>
+        <div><b>2</b><span>Breathing normally?</span><em></em></div>
+        <div><b>3</b><span>CPR · 110/min</span><em></em></div>
+      </div>
+    </div>
+    <div class="abs el" id="g3" style="left:160px; top:640px; display:flex; align-items:center; gap:40px;">
+      <div id="beat" style="width:120px; height:120px; border-radius:50%; background:var(--red);"></div>
+      <div>
+        <div class="h ink" style="font-size:96px;">110<span class="ink-3" style="font-size:44px; font-weight:500; letter-spacing:0"> beats / min</span></div>
+        <div class="ink-2" style="font-size:40px; font-weight:500;">Hands stay on the chest.</div>
+      </div>
     </div>
   </div>
 
@@ -184,8 +198,6 @@ function render(t) {
   scene("s-opener", t, 0, reveal + 0.05, 0.3);
   const o = S("open"), od = TL.open.dur, ot = TL.open.text;
   show("o1", t, 0.1, reveal - 0.1, 30, 0.9);
-  [["o2", "A heart"], ["o3", "A deep"], ["o4", "An earth"]].forEach(([id, w]) =>
-    show(id, t, o + od * (ot.indexOf(w) / ot.length) - 0.1, reveal - 0.1, 18, 0.5));
   // reveal
   const pMark = outExpo(prog(t, reveal + 0.05, reveal + 0.7));
   const pLight = inOut(prog(t, reveal + 0.35, reveal + 1.2));
@@ -213,11 +225,27 @@ function render(t) {
   show("a3", t, v + 2.2);
   // scope
   const c0 = S("scope"), cd = TL.scope.dur, ct = TL.scope.text;
-  scene("s-scope", t, c0 - 0.15, S("case") - 0.15);
+  scene("s-scope", t, c0 - 0.15, S("ai") - 0.15);
   show("sc0", t, c0 - 0.1);
   show("scNote", t, c0 + cd * 0.75, 1e9, 10);
   [["sc1", "Cardiac"], ["sc2", "severe"], ["sc3", "choking"], ["sc4", "an earthquake"], ["sc5", "a flood"]].forEach(([id, w]) =>
     show(id, t, c0 + cd * (ct.indexOf(w) / ct.length) - 0.15, 1e9, 22, 0.5));
+  // AI guide before the dispatcher picks up
+  const g = S("ai"), cells = [...$("proto").children];
+  scene("s-guide", t, g - 0.15, S("case") - 0.15);
+  show("g1", t, g - 0.05);
+  show("g2", t, g + 0.3, 1e9, 30);
+  const gs = [
+    t < g + 0.7 ? "" : t < g + 1.6 ? "cur" : "done",
+    t < g + 1.6 ? "" : t < g + 2.5 ? "cur" : "done",
+    t < g + 2.5 ? "" : "cur",
+  ];
+  const gt = [gs[0] === "cur" ? "Asking now" : gs[0] === "done" ? "No" : "", gs[1] === "cur" ? "Asking now" : gs[1] === "done" ? "No" : "", gs[2] === "cur" ? "Guiding" : ""];
+  cells.forEach((c, i) => { c.className = gs[i]; c.querySelector("em").textContent = gt[i]; });
+  show("g3", t, g + 2.6);
+  const bt = Math.max(0, t - (g + 2.6)) % (60 / 110), pulse = Math.exp(-bt * 9);
+  $("beat").style.transform = `scale(${(0.82 + 0.18 * pulse).toFixed(3)})`;
+  $("beat").style.opacity = (0.75 + 0.25 * pulse).toFixed(3);
   // case
   const k = S("case");
   scene("s-case", t, k - 0.2, 1e9);

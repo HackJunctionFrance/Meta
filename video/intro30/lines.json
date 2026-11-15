@@ -1,7 +1,26 @@
 [
- ["open", "Every day, people face emergencies they were never trained for. A heart stops. A deep cut. An earthquake."],
- ["reveal", "This is FirstFive."],
- ["view", "With AI glasses, the dispatcher sees exactly what you see, and a voice guides you, step by step, hands-free."],
- ["scope", "Cardiac arrest, severe bleeding, choking, an earthquake, a flood: one guide for any emergency."],
- ["case", "Here is one case we built end to end: a cardiac arrest."]
+ [
+  "open",
+  "Every day, people face emergencies they were never trained for."
+ ],
+ [
+  "reveal",
+  "This is FirstFive."
+ ],
+ [
+  "view",
+  "With AI glasses, the emergency dispatcher sees exactly what you see, hands-free."
+ ],
+ [
+  "scope",
+  "Cardiac arrest, severe bleeding, choking, an earthquake, a flood: one guide for any emergency."
+ ],
+ [
+  "ai",
+  "And until a dispatcher answers, an AI voice guides you through the first steps."
+ ],
+ [
+  "case",
+  "Here is one case we built end to end: a cardiac arrest."
+ ]
 ]
