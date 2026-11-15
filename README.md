@@ -10,7 +10,7 @@ Built in 48 hours at **Junction 2026** for Meta's *AI Glasses for Everyone, Ever
 
 | Try it | Where |
 | --- | --- |
-| Interactive demo in your browser (no install) | [`demo-web/`](demo-web/) · hosted: <https://claude.ai/artifact/3onBukDBsmn6FgGqdtAgbj> |
+| Interactive demo in your browser (no install) | **<https://firstfive-demovercelapp.vercel.app/>** (source: [`demo-web/`](demo-web/)) |
 | Full prototype on your machine (no glasses needed) | [Quickstart](#quickstart-no-glasses-needed) below |
 | How it works inside | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
 
