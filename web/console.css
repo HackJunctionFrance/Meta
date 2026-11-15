@@ -224,18 +224,6 @@ body[data-phase="connected"] .btn.primary {
 .protocol li[data-state="current"] em:empty::before { content: "Asking now"; }
 .protocol li[data-state="skipped"] { opacity: 0.55; }
 
-.say { padding: 14px 18px 18px; border-top: 1px solid var(--rule); }
-.say label { display: block; font-size: 13px; font-weight: 600; color: var(--ink-2); margin-bottom: 8px; }
-.say-row { display: flex; gap: 8px; }
-.say input {
-  flex: 1;
-  min-width: 0;
-  padding: 9px 12px;
-  border: 1px solid var(--rule-strong);
-  border-radius: 8px;
-  background: var(--card);
-}
-.say input::placeholder { color: var(--ink-3); }
 .check { display: flex; gap: 8px; align-items: center; padding: 14px 18px; color: var(--ink-2); border-top: 1px solid var(--rule); }
 
 /* Briefing */

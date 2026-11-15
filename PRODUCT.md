@@ -30,7 +30,7 @@ The dispatcher sees the scene from the witness's own eyes, hands-free, while gui
 ## Capabilities and Constraints
 
 - Phases: `idle` (waiting), `ai_guide` (incoming emergency, automated guide running), `connected` (dispatcher on the call), `ended`.
-- Live JPEG frames from the glasses, device status badge, briefing card (situation, location, scene, facts), timeline, live voice status, backup text message to the phone, end call → report (fallback report when no LLM is configured), rehearsal controls (keys 1 2 3 4 0).
+- Live JPEG frames from the glasses, device status badge, briefing card (situation, location, scene, facts), timeline, live voice status, end call → report (fallback report when no LLM is configured), rehearsal controls (keys 1 2 3 4 0).
 - JS hooks are element IDs in `web/app.js`; any redesign must keep them.
 - Guide answers are a fixed script, not a free conversation with a model. Location and battery are not implemented yet.
 

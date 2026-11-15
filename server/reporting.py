@@ -18,9 +18,15 @@ DEMO_CASE = {
     ],
     "receiving": "Cardiac arrest centre, pre-alerted for a possible incoming patient.",
     "conversation": [
-        ["Dispatcher", "Emergency services. I can see what you see. You're doing great. Keep pushing, hard and fast, don't stop."],
+        [
+            "Dispatcher",
+            "Emergency services. I can see what you see. You're doing great. Keep pushing, hard and fast, don't stop.",
+        ],
         ["Witness", "Okay… okay."],
-        ["Dispatcher", "An ambulance is on its way, four minutes. Keep going until they take over."],
+        [
+            "Dispatcher",
+            "An ambulance is on its way, four minutes. Keep going until they take over.",
+        ],
         ["Witness", "Got it."],
         ["Dispatcher", "The ambulance is arriving. You can stop now. Well done."],
     ],
@@ -40,7 +46,8 @@ def narrative(session):
         parts.append(
             "The witness reported the person as "
             + " and ".join(
-                f"{e['label'].replace(' (reported)', '').lower()} (+{e['t']:.1f} s)" for e in answers
+                f"{e['label'].replace(' (reported)', '').lower()} (+{e['t']:.1f} s)"
+                for e in answers
             )
             + "."
         )
@@ -54,6 +61,7 @@ def narrative(session):
         )
     parts.append(f"The call lasted {m['total_seconds']:.1f} s.")
     return " ".join(parts)
+
 
 TRANSCRIPTION_BUDGET = 50
 
@@ -137,7 +145,9 @@ async def build(session, directory, progress):
         session.warnings.append("AI summary unavailable; deterministic report retained.")
     if os.getenv("FIRSTFIVE_DEMO_REPORT", "1") != "0":
         session.report.setdefault("demo", DEMO_CASE)
-    session.report["started"] = time.strftime("%d %b %Y · %H:%M", time.localtime(session.started_at))
+    session.report["started"] = time.strftime(
+        "%d %b %Y · %H:%M", time.localtime(session.started_at)
+    )
     session.report["frames"] = selected
     session.report["metrics"] = session.metrics()
     session.report_status = "done"

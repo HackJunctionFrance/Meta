@@ -1,120 +1,123 @@
 # FirstFive
 
-**Reprise de conversation : lire [la passation détaillée](docs/HANDOFF.md).** Elle décrit l’état réel des lunettes, les tests effectués et la configuration LiveKit `.env` encore à terminer sur le Mac. Pour la démo : [réponses manuelles](docs/DEMO_MANUELLE.md).
+**AI glasses that let an emergency dispatcher see what you see, while an AI voice guides your hands through the first five minutes of any emergency.**
 
-Prototype Junction : un témoin déclenche une alerte, un guide fixe pose deux questions, une console reçoit la vidéo et les faits, puis un régulateur prend le relais par LiveKit. Le rapport conserve chronologie, images, dialogue et transmission MIST.
+Built in 48 hours at **Junction 2026** for Meta's *AI Glasses for Everyone, Everyday* challenge. Runs on real **Meta Ray-Ban Display** glasses through the **Wearables Device Access Toolkit**.
 
-**Démonstration uniquement.** Aucun appel au vrai 112 et aucun envoi à un hôpital. Répéter avec des participants consentants et un coussin/mannequin. Le temps affiché est le démarrage du **guidage**, pas une compression mesurée.
+[![tests](https://img.shields.io/badge/tests-29%20passing-1f7a4a)](#tests) ![python](https://img.shields.io/badge/python-3.11%2B-3a6ea5) ![iOS](https://img.shields.io/badge/iOS-Swift%20%2B%20Meta%20DAT-121416) ![status](https://img.shields.io/badge/status-hackathon%20prototype-c62a1e)
 
-## Démarrer sans lunettes ni clés
+> **Simulation only.** FirstFive never contacts a real emergency service. Rehearse with consenting participants and a manikin or cushion.
 
-Python 3.11+ (validé ici avec 3.12). Depuis la racine du dépôt :
-
-```sh
-python3 -m venv .venv
-. .venv/bin/activate
-pip install -r requirements.lock
-cp .env.example .env  # seulement si .env n'existe pas déjà
-uvicorn server.main:app --host 0.0.0.0 --port 8000
-```
-
-Sur le Mac, ouvrir les chemins suivants à l'adresse du serveur :
-
-| Chemin | Usage |
+| Try it | Where |
 | --- | --- |
-| `/console?mode=operator` | Régulateur : décrocher, micro, captions, terminer |
-| `/console?mode=viewer` | Projection sans commandes ni micro |
-| `/caller` | Écran projeté du témoin |
-| `/test-caller` | Remplace l'iPhone : bouton Emergency, oui/non, voix, caméra |
-| `/report/{id}` | Rapport imprimable |
-| `/health` | État et présence des intégrations, sans exposer les clés |
+| Interactive demo in your browser (no install) | [`demo-web/`](demo-web/) · hosted: <https://claude.ai/artifact/3onBukDBsmn6FgGqdtAgbj> |
+| Full prototype on your machine (no glasses needed) | [Quickstart](#quickstart-no-glasses-needed) below |
+| How it works inside | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
 
-Option terminal, dans une seconde fenêtre :
+---
 
-```sh
-.venv/bin/python -m server.sim_app --auto-pickup
-# Générer un MP4 synthétique pour OpenCV ou le Mock Device Kit :
-.venv/bin/python scripts/make_sample.py
-# Vidéo de répétition consentie ; sinon images synthétiques clairement marquées.
-.venv/bin/python -m server.sim_app --video sample.mp4 --auto-pickup
-# Échantillons audio facultatifs, offset de début du décroché dans ce scénario :
-.venv/bin/python -m server.sim_app --auto-pickup --caller-audio caller.webm --dispatcher-audio dispatcher.webm
+## The problem
+
+Every day, people face emergencies they were never trained for: a cardiac arrest, severe bleeding, choking, an earthquake. The first person on the scene is rarely a professional, and the minutes before help arrives decide the outcome. In a cardiac arrest, survival drops by up to 10% for every minute without CPR (American Heart Association).
+
+Today the emergency dispatcher can only guide **by voice**. They cannot see the scene, and the witness needs **both hands**: a phone video call takes one away.
+
+## What FirstFive does
+
+| | |
+| --- | --- |
+| ![The witness's first-person view](docs/img/glasses-pov.jpg) | 1. **One tap raises the alert.** The glasses stream the witness's first-person view.<br><br>2. **An AI voice guides immediately**, before any human picks up: *"Is he responding?"*, *"Is he breathing normally?"*, then *"Push hard and fast, follow the beat"* with a 110/min metronome in the ear. Hands stay on the chest.<br><br>3. **The dispatcher takes over** with the live view and corrects what they see: *"Your hands are a bit high, lock your elbows."*<br><br>4. **A handover report is ready** when the ambulance arrives: timeline, timings, key frames, MIST handover. |
+
+The live view, the guide and the take-over are generic. **Only the protocol changes** between emergencies: the prototype implements cardiac arrest end to end; bleeding, choking, burns, earthquakes and floods are designed and would each be a new step table on the server (see [`server/domain.py`](server/domain.py)).
+
+![The dispatcher console during a real call: live view from the Ray-Ban Display glasses, protocol strip, timeline](docs/img/console-live.jpg)
+*The dispatcher console during a real rehearsal call: the first-person view from the glasses, the protocol strip (step 3 guiding), the timeline, and the dispatcher on the line.*
+
+![The handover report generated at the end of the call](docs/img/report.jpg)
+*The report, generated only from what happened in the call. Timings measure guidance, not verified compressions, and the report says so.*
+
+## Architecture
+
+```mermaid
+flowchart LR
+  G["Ray-Ban Display<br/>first-person camera"] -- "Device Access Toolkit" --> P["iPhone app (Swift)<br/>alert · spoken guide · metronome"]
+  P -- "WebSocket: JSON + JPEG frames" --> S["FastAPI server<br/>call state · protocol · report"]
+  S -- "WebSocket: state, frames, prompts" --> C["Dispatcher console (web)<br/>live view · protocol · take-over"]
+  P <-. "LiveKit: two-way voice" .-> C
+  S --> R[("data/&lt;session&gt;/<br/>frames · audio · report")]
 ```
 
-N'utiliser qu'un producteur `/ws/app` à la fois : simulateur Python, page test-caller **ou** iPhone. Les consoles peuvent être multiples. Un seul opérateur doit piloter et enregistrer la démo.
+- **The server is the single source of truth** for the protocol step and every timestamp. Phone and console only render what it sends, so the guide can never advance twice and the report's timings come from one clock.
+- **Voice runs peer to peer over LiveKit** (rooms scoped to the session, tokens valid 30 minutes, keys stay server-side), so a dropped control socket does not cut the call.
+- Details, message protocol and state machine: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-Sur la page test-caller : Emergency → No → No ; sur la console : Answer → parler ou saisir une caption → End. Les permissions de micro/caméra nécessitent **localhost ou HTTPS avec certificat approuvé**. Un simple `http://IP-du-Mac` ne suffit pas pour le micro de l'ordinateur du régulateur ou du téléphone. Utiliser HTTPS local approuvé sur les appareils, ou faire tourner/projeter les deux navigateurs sur le Mac pour la première répétition. Ne pas désactiver les vérifications TLS. Le partage de connexion doit permettre les flux LiveKit.
+## How the prototype answers the challenge brief
 
-Touches opérateur : `1` déclencher, `2` oui, `3` non, `4` répéter la consigne, `0` réinitialiser. `4` ne fabrique jamais une réponse médicale pour forcer une étape.
+The brief asks for a prototype that *"handles permissions, errors, performance trade-offs, connectivity, and device state changes"*, with *"appropriate consent and safe data practices"*. Where to find each:
 
-## Voix réelle avant les lunettes
+| Brief asks for | What FirstFive does | Evidence |
+| --- | --- | --- |
+| **Permissions** | Camera via the Meta DAT pairing flow; microphone and speech recognition requested in-app with explicit fallbacks to buttons if refused; local network to reach the server | [`ios/Sources/FirstFiveClient.swift`](ios/Sources/FirstFiveClient.swift) (`enableListening`, permission helpers) |
+| **Errors** | JPEGs validated (format, 2 MB, 4 MP); answers checked against the active step; invalid payloads rejected with a message, never a crash; untrusted text escaped in the report | [`server/main.py`](server/main.py), tests `test_invalid_and_late_answers`, `test_read_only_and_bad_payload`, `test_report_escapes_untrusted_text` |
+| **Performance trade-offs** | Frames downscaled to 800 px JPEG on the phone, ~15 fps, one frame in flight (natural back-pressure); server caps at 20 fps; a key frame every 10 s, max 60 per call; audio capped at 24 MB per track | [`FirstFiveClient.frame`](ios/Sources/FirstFiveClient.swift), [`server/main.py`](server/main.py) (`frame`, `keyframe`) |
+| **Connectivity** | Phone WebSocket reconnects every 2 s; on reconnect the server re-sends the current prompt so the witness is never left in silence; voice survives a control-socket drop; audio upload retries are idempotent | tests `test_reconnecting_app_receives_current_prompt`, `test_images_reconnect_reset`, `test_audio_segments_are_retained_and_retry_is_idempotent` |
+| **Device state changes** | Glasses session and stream state are pushed to the console badge; one producer at a time is enforced | `deviceStatus` in the iOS client, test `test_duplicate_producer_and_invalid_coordinates` |
+| **Consent & safe data** | Nothing is recorded before the alert or after the call; data stays on the operator's machine (`data/`, git-ignored); optional access key with HTTP-only cookie; LiveKit secrets never leave the server; simulation banner always visible | [`server/main.py`](server/main.py), test `test_key_auth_and_cross_origin`, `test_livekit_missing_and_room_scoping` |
+| **Inclusive interaction** | Voice, phone buttons, or the dispatcher answers for the witness; every spoken instruction is also shown as text on the phone panel and the projection view; high-contrast console where every state is written, never shown by color alone | [`ios/Sources/FirstFivePanel.swift`](ios/Sources/FirstFivePanel.swift), [`web/console.html`](web/console.html), [`web/caller.html`](web/caller.html) |
 
-Dans `.env`, renseigner `LIVEKIT_URL` (`wss://...`), `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`, puis redémarrer le serveur. Ces valeurs restent côté serveur ; seuls des jetons de salle valables 30 minutes sont transmis aux clients. Tester `/test-caller` + console avec casques. Answer active le micro et l'enregistrement ; End téléverse les deux pistes avant de lancer le rapport. Une erreur d'envoi permet de réessayer End sans jeter les enregistrements.
+## Quickstart (no glasses needed)
 
-Un LiveKit **local** est également utilisable sans compte pour la répétition sur une seule machine :
-
-```sh
-python3 scripts/install_livekit.py
-.tools/livekit-server --dev --bind 127.0.0.1 --node-ip 127.0.0.1 --rtc.enable_loopback_candidate
-```
-
-Dans un autre terminal :
-
-```sh
-LIVEKIT_URL=ws://127.0.0.1:7880 LIVEKIT_API_KEY=devkey LIVEKIT_API_SECRET=secret \
-  .venv/bin/uvicorn server.main:app --host 127.0.0.1 --port 8001
-```
-
-Ces identifiants sont les **valeurs publiques du mode développement** de LiveKit, uniquement sur loopback. Utiliser les vraies clés LiveKit Cloud pour les appareils en réseau. Le mode local a été testé sous Linux avec Chromium et des micros synthétiques ; l'écoute humaine reste à vérifier.
-
-## IA et transcription facultatives
-
-- `LLM_PROVIDER=anthropic` avec `ANTHROPIC_API_KEY`, ou `LLM_PROVIDER=gemini` avec `GEMINI_API_KEY`.
-- `LLM_MODEL` doit être un identifiant exact disponible dans **votre** console fournisseur. Aucun modèle supposé n'est codé en dur.
-- `OPENAI_API_KEY` active la transcription horodatée ; `TRANSCRIPTION_MODEL=whisper-1` utilise `verbose_json` + segments.
-- Sans clés ou en cas d'erreur : faits déterministes, chronologie, images et captions sont conservés. Une transcription manquante n'est jamais inventée.
-- Ligne visuelle : timeout 5 s ; rapport : 20 s ; transcription : 40 s par requête, avec un budget global de 50 s et deux requêtes simultanées. Le modèle reçoit des images/données uniquement après une alerte. Une synthèse IA est un brouillon à vérifier contre les sources, pas une observation médicale validée.
-
-Destinations réseau utiles : `api.anthropic.com`, `generativelanguage.googleapis.com`, `api.openai.com`, votre domaine LiveKit et ses destinations WebRTC/TURN. Ici les appels payants n'ont **pas** été exécutés : leurs SDK sont testés avec réponses HTTP simulées. Configurer les valeurs dans `.env` local ou les paramètres sécurisés de l'environnement, jamais dans Git ou dans le chat.
-
-## iPhone / Meta
-
-Voir [ios/README.md](ios/README.md). `ios/prepare.py` génère CameraAccess officiel à une révision précise, conserve son appairage et Mock Device Kit, puis ajoute le panneau FirstFive, WebSocket, JPEG, parole/écoute et LiveKit.
+Python 3.11+.
 
 ```sh
-python3 ios/prepare.py
-open ios/CameraAccess/CameraAccess.xcodeproj
+python3 -m venv .venv && . .venv/bin/activate
+pip install -r requirements.lock
+cp .env.example .env
+uvicorn server.main:app --port 8000
 ```
 
-Le premier projet a été compilé et lancé par l’utilisateur sur son iPhone avec Xcode 27.2. Les correctifs Swift ajoutés depuis doivent être recompilés sur ce Mac. Le routage Bluetooth et la caméra réelle restent à tester avec les lunettes.
+Then open two tabs:
 
-## Vérifications
+1. <http://localhost:8000/test-caller>: plays the witness (replaces the iPhone). Press **Emergency**, wait for the first question, answer **No**, **No**.
+2. <http://localhost:8000/console?mode=operator>: the dispatcher. Watch the protocol strip light up, press **Answer call**, then **End call** and open the report.
+
+Operator keys for rehearsals: `1` trigger · `2` yes · `3` no · `4` repeat prompt · `0` reset. Two-way voice needs LiveKit keys in `.env` (or a local LiveKit dev server, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#voice)); without them, everything else works and the console says voice is unavailable.
+
+**On the glasses:** `python3 ios/prepare.py` generates Meta's official CameraAccess sample at a pinned revision and adds the FirstFive layer. See [`ios/README.md`](ios/README.md).
+
+## Tests
 
 ```sh
-.venv/bin/pytest -q
-# Facultatif pour les tests de navigateur :
-.venv/bin/pip install -r requirements-dev.txt
-# Installer Chromium via Playwright si aucun navigateur système disponible :
-.venv/bin/playwright install chromium
-CHROMIUM_PATH=/chemin/vers/chromium .venv/bin/python tests/browser_smoke.py
-# Avec les deux serveurs LiveKit/FastAPI locaux décrits plus haut :
-CHROMIUM_PATH=/chemin/vers/chromium .venv/bin/python tests/browser_voice.py
+pip install -r requirements-dev.txt
+pytest -q          # 29 tests
+ruff check .
 ```
 
-Les tests utilisent `/usr/bin/chromium` par défaut ; `FIRSTFIVE_TEST_URL` permet de changer le serveur. Chaque test navigateur réinitialise **le serveur de démo choisi**, ne pas le lancer pendant une intervention à conserver. [Résultats et limites](docs/VALIDATION.md).
+They cover the full call scenario and persistence, both protocol branches, invalid and late answers, reconnection, upload validation and retries, report escaping, access-key auth, LiveKit room scoping, report survival across restarts, server-side timing, and the safe-update tooling. Browser end-to-end scripts (Playwright) are in [`tests/browser_smoke.py`](tests/browser_smoke.py) and [`tests/browser_voice.py`](tests/browser_voice.py).
 
-## Architecture et données
+## Repository map
 
-- Un processus FastAPI, une intervention courante, WebSockets JSON + JPEG limités à 3/s et 2 MB/image ; données dans `data/<id>/`.
-- Le serveur fait autorité sur l'étape et les heures. iPhone/navigateur parlent les messages reçus. Cette centralisation évite une double progression et permet les overrides ; **le guidage autonome hors connexion n'est pas implémenté**. La perte du serveur arrête le guide et est affichée.
-- Aucune image n'est persistée avant l'alerte ou après End. JPEG vérifiés, images clés bornées, enregistrements limités à 24 MB/piste. Les rapports antérieurs restent consultables après redémarrage ; une intervention interrompue n'est pas reprise automatiquement.
-- Les deux pistes ont chacune leur offset relatif à l'alerte ; les segments sont fusionnés chronologiquement. Les captions sont un repli uniquement pour les pistes sans transcription réussie.
-- Guide et métronome s'arrêtent au décroché ; caméra continue. « Oui » termine le questionnement automatique. Reconnaissance anglaise ; boutons de secours toujours accessibles.
-- Le mode viewer est en lecture seule au niveau du protocole, mais ce prototype n'a pas d'identités opérateur indépendantes. Sur un réseau partagé, définir `FIRSTFIVE_ACCESS_KEY` ; ouvrir une fois `/?key=...` pour le cookie HTTP-only, puis naviguer normalement. iPhone/simulateur utilisent `X-FirstFive-Key`. Ne pas exposer ce prototype sur Internet.
-- Les fichiers sont locaux et exclus de Git ; pas de suppression automatique. Effacer les dossiers de session après la répétition selon le consentement obtenu. Aucun mécanisme d'envoi aux hôpitaux n'est présent.
+| Path | Contents |
+| --- | --- |
+| [`server/`](server/) | FastAPI app: call hub and WebSockets (`main.py`), protocol and session model (`domain.py`), report (`reporting.py`), optional AI and transcription adapters (`llm.py`, `transcription.py`), Python simulator (`sim_app.py`) |
+| [`web/`](web/) | Dispatcher console, projection view, browser witness simulator, report template |
+| [`ios/`](ios/) | Swift layer added to Meta's CameraAccess sample (`Sources/`) and the generator `prepare.py` |
+| [`demo-web/`](demo-web/) | Static, install-free interactive demo of the full call |
+| [`tests/`](tests/) | Pytest suite and Playwright browser scripts |
+| [`scripts/`](scripts/) | Mac launcher, safe updater that preserves Xcode signing and secrets, LiveKit helpers |
+| [`video/`](video/) | Reproducible sources of the demo video (motion design as HTML, voice-over, edit filters) |
+| [`docs/`](docs/) | [Architecture](docs/ARCHITECTURE.md), [product brief](PRODUCT.md), [development log](docs/dev-log/README.md) |
 
-Le guide fourni est conservé comme [référence produit](docs/REFERENCE.md). Le présent README décrit le comportement implémenté, notamment les différences explicites ci-dessus.
+## Honest status
 
-## Mise à jour après installation sur Mac
+**Validated on hardware during the hackathon:** live stream from Ray-Ban Display glasses through the iPhone to the console; the cardiac arrest guide with its metronome; the dispatcher take-over; the report; two-way voice in the recorded demo.
 
-Voir [la mise à jour 02](docs/UPDATE_02.md) pour conserver la signature Xcode, les clés et les données. Les enregistrements supportent plusieurs segments par interlocuteur après reconnexion, avec offsets distincts et reprise des téléversements.
+**Known limits:** voice answers ("yes"/"no") work but are not reliable in a noisy room, so the demo uses a teammate pressing Yes/No; one active call per server; location and battery are not wired yet; the optional AI summary and transcription adapters are tested against mocked APIs only. Other emergencies are designed but not yet implemented as protocols.
+
+## Roadmap to a pilot
+
+1. **Training room:** dispatch trainers and CPR manikins, measured against voice-only calls (time to first compression, hand position corrected, compression rate in range).
+2. **One dispatch centre:** opt-in volunteers who already wear AI glasses.
+3. **Integration:** a link the dispatcher opens from the call software they already use.
+
+Next on the product: bleeding, choking, burns, earthquake and flood protocols; alert from a tap on the glasses; real location; more languages; medical and GDPR review.
