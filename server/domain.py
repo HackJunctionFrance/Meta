@@ -5,10 +5,10 @@ import uuid
 from dataclasses import asdict, dataclass, field
 
 PROMPTS = {
-    "responsive": "This is a simulated emergency call. Is he responding? Shake his shoulders.",
+    "responsive": "Is he responding? Shake his shoulders.",
     "breathing": "Is he breathing normally? Look at his chest.",
     "cpr": "Put your hands in the center of his chest. Push hard and fast, follow the beat.",
-    "stay": "Stay with him. Continue monitoring and speak to the dispatcher.",
+    "stay": "A dispatcher is taking your call now.",
 }
 
 
