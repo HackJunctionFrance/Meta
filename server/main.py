@@ -288,7 +288,7 @@ class Hub:
         if len(data) > MAX_IMAGE:
             raise ValueError("Frame exceeds 2 MB")
         now = time.monotonic()
-        if now - self.last_frame < 1 / 3:
+        if now - self.last_frame < 1 / 20:
             return
         try:
             with Image.open(io.BytesIO(data)) as img:

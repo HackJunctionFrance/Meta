@@ -168,14 +168,14 @@ final class FirstFiveClient: NSObject, AVSpeechSynthesizerDelegate {
   /// Called from the sample's decoded frame callback. Never stores video outside an active alert.
   func frame(_ image: UIImage) {
     guard ["ai_guide", "connected"].contains(phase), status == "Connected",
-      !frameBusy, Date().timeIntervalSince(lastFrame) >= 1.0 / 3.0, let socket else { return }
+      !frameBusy, Date().timeIntervalSince(lastFrame) >= 1.0 / 15.0, let socket else { return }
     lastFrame = Date(); frameBusy = true
     let capturedSessionID = sessionID
     let generation = connectionGeneration
     Task {
       // Resize and JPEG compression are isolated from the main actor.
       let data = await Task.detached(priority: .utility) {
-        let ratio = min(1, 960 / image.size.width)
+        let ratio = min(1, 800 / image.size.width)
         let size = CGSize(width: image.size.width * ratio, height: image.size.height * ratio)
         let resized = UIGraphicsImageRenderer(size: size).image { _ in image.draw(in: CGRect(origin: .zero, size: size)) }
         return resized.jpegData(compressionQuality: 0.5)
