@@ -115,7 +115,7 @@ class Hub:
     async def first_prompt(self, s):
         # Pause after the alert so the witness can settle before the first question.
         # Skipped if an answer, reset or pickup happened meanwhile.
-        await asyncio.sleep(float(os.getenv("FIRSTFIVE_FIRST_PROMPT_DELAY", "10")))
+        await asyncio.sleep(float(os.getenv("FIRSTFIVE_FIRST_PROMPT_DELAY", "15")))
         if self.session is s and s.phase == "ai_guide" and s.step == "responsive":
             await self.prompt()
 

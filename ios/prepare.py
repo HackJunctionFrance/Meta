@@ -103,6 +103,8 @@ plist.write_bytes(plistlib.dumps(info))
 pbx = dest / "CameraAccess.xcodeproj/project.pbxproj"
 text = pbx.read_text()
 # Existing sample has explicit source lists, so register both overlay files.
+patch(app / "Views/DebugMenuView.swift", '    HStack {\n      Spacer()\n      VStack {\n        Spacer()\n        Button(action: {', '    // Top-left corner: centred on the right edge it covered the FirstFive panel header.\n    HStack {\n      VStack {\n        Button(action: {')
+patch(app / "Views/DebugMenuView.swift", '        }.accessibilityIdentifier("debug_menu_button")\n        Spacer()\n      }\n      .padding(.trailing)\n    }', '        }.accessibilityIdentifier("debug_menu_button")\n        Spacer()\n      }\n      .padding(.leading)\n      .padding(.top, 8)\n      Spacer()\n    }')
 for index, name in enumerate(["FirstFiveClient.swift", "FirstFivePanel.swift"]):
     ref = f"F1F1000000000000000000{index:02X}"
     build = f"F1F2000000000000000000{index:02X}"
