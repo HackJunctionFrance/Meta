@@ -16,7 +16,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from PIL import Image, UnidentifiedImageError
 
 from . import llm, reporting
-from .domain import PROMPTS, Session
+from .domain import HANDOVER, PROMPTS, Session
 
 ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(ROOT / ".env")
@@ -118,6 +118,20 @@ class Hub:
         await asyncio.sleep(float(os.getenv("FIRSTFIVE_FIRST_PROMPT_DELAY", "10")))
         if self.session is s and s.phase == "ai_guide" and s.step == "responsive":
             await self.prompt()
+
+    async def announce_handover(self, s):
+        # After the CPR instruction and a few compressions, tell the witness a
+        # dispatcher is coming on the line (the metronome keeps going).
+        await asyncio.sleep(float(os.getenv("FIRSTFIVE_HANDOVER_DELAY", "10")))
+        if self.session is s and s.phase == "ai_guide" and s.step == "cpr":
+            await self.broadcast(
+                {
+                    "type": "caller_heard",
+                    "source": "ai_guide",
+                    "text": HANDOVER,
+                    "step_id": "handover",
+                }
+            )
 
     async def scene_loop(self, s):
         while self.session is s and s.phase in ("ai_guide", "connected"):
@@ -222,6 +236,8 @@ class Hub:
             self.keyframe(s, s.timeline[-1]["label"])
             await self.publish()
             await self.prompt()
+            if s.step == "cpr":
+                self.spawn(self.announce_handover(s))
             return
         if kind == "pickup":
             if s.phase == "connected":
