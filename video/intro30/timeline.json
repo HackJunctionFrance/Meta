@@ -1,0 +1,28 @@
+{
+ "open": {
+  "start": 0.5,
+  "dur": 6.726,
+  "text": "Every day, people face emergencies they were never trained for. A heart stops. A deep cut. An earthquake."
+ },
+ "reveal": {
+  "start": 8.026,
+  "dur": 1.195,
+  "text": "This is FirstFive."
+ },
+ "view": {
+  "start": 10.721,
+  "dur": 6.869,
+  "text": "With AI glasses, the dispatcher sees exactly what you see, and a voice guides you, step by step, hands-free."
+ },
+ "scope": {
+  "start": 18.29,
+  "dur": 6.092,
+  "text": "Cardiac arrest, severe bleeding, choking, an earthquake, a flood: one guide for any emergency."
+ },
+ "case": {
+  "start": 24.982,
+  "dur": 3.612,
+  "text": "Here is one case we built end to end: a cardiac arrest."
+ },
+ "_total": 30.294
+}

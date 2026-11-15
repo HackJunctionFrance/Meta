@@ -14,3 +14,7 @@
 ## Sequential demo (FirstFive-demo.mp4)
 
 POV 0–39.0 s (ends after "A dispatcher is answering your call now."), centred over its own blurred frame, then the console recording in full. 0.3 s fade. Filter: `sequence_filter.txt`. The split-screen version was dropped.
+
+## Final 2-minute cut (FirstFive-video-finale.mp4, 1:59.9)
+
+- 30 s context intro (`video/intro30/`), 0.5 s fade, then the sequential demo sped up x1.091 (video setpts, audio atempo: pitch kept).
